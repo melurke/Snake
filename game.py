@@ -41,16 +41,27 @@ def PrintBoard(board):
             boardStr += "  " + content
     print(boardStr)
 
-def CheckInput():
-    if keyboard.is_pressed('w'):
+def CheckInput(direction):
+    if keyboard.is_pressed('w') and direction != [0, 1]:
         return [0, -1]
-    if keyboard.is_pressed('a'):
+    if keyboard.is_pressed('a') and direction != [1, 0]:
         return [-1, 0]
-    if keyboard.is_pressed('s'):
+    if keyboard.is_pressed('s') and direction != [0, -1]:
         return [0, 1]
-    if keyboard.is_pressed('d'):
+    if keyboard.is_pressed('d') and direction != [-1, 0]:
         return [1, 0]
     return [0, 0]
+
+def CheckDeath(headPos, snakePos):
+    bodyPos = snakePos.copy()
+    bodyPos.remove(headPos)
+    if headPos in bodyPos:
+        return True
+
+    isOffScreen = not (0 < headPos[0] < 18) or not (0 < headPos[1] < 18)
+    if isOffScreen:
+        return True
+    return False
 
 def Main():
     os.system('cls' if os.name == 'nt' else 'clear')
@@ -66,17 +77,21 @@ def Main():
         headPos[0] += direction[0]
         headPos[1] += direction[1]
         snakePos.append(headPos.copy())
-
         applePos = EatApple(headPos, snakePos, applePos, length)
+
+        if CheckDeath(headPos, snakePos):
+            break
         UpdateBoard(headPos, applePos, snakePos, board)
         PrintBoard(board)
         while True:
-            input = CheckInput()
+            input = CheckInput(direction)
             if input != [0, 0]:
                 wait(0.2)
+                direction = input.copy()
                 break
-        direction = input.copy()
         os.system('cls' if os.name == 'nt' else 'clear')
+    os.system('cls' if os.name == 'nt' else 'clear')
+    print(f"You lost! Your score was {length}")
 
 if __name__ == '__main__':
     Main()
