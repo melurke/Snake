@@ -16,7 +16,7 @@ def EatApple(headPos, snakePos, applePos, length):
         applePos = ChooseApplePosition(snakePos)
     else:
         snakePos.remove(snakePos[0])
-    return applePos
+    return applePos, length
 
 def UpdateBoard(headPos, applePos, snakePos, board):
     for y in range(1, 18):
@@ -42,14 +42,16 @@ def PrintBoard(board):
     print(boardStr)
 
 def CheckInput(direction):
-    if keyboard.is_pressed('w') and direction != [0, 1]:
-        return [0, -1]
-    if keyboard.is_pressed('a') and direction != [1, 0]:
-        return [-1, 0]
-    if keyboard.is_pressed('s') and direction != [0, -1]:
-        return [0, 1]
-    if keyboard.is_pressed('d') and direction != [-1, 0]:
-        return [1, 0]
+    for i in range(50):
+        wait(0.01)
+        if keyboard.is_pressed('w') and direction != [0, 1]:
+            return [0, -1]
+        if keyboard.is_pressed('a') and direction != [1, 0]:
+            return [-1, 0]
+        if keyboard.is_pressed('s') and direction != [0, -1]:
+            return [0, 1]
+        if keyboard.is_pressed('d') and direction != [-1, 0]:
+            return [1, 0]
     return [0, 0]
 
 def CheckDeath(headPos, snakePos):
@@ -77,18 +79,17 @@ def Main():
         headPos[0] += direction[0]
         headPos[1] += direction[1]
         snakePos.append(headPos.copy())
-        applePos = EatApple(headPos, snakePos, applePos, length)
+        applePos, length = EatApple(headPos, snakePos, applePos, length)
 
         if CheckDeath(headPos, snakePos):
             break
         UpdateBoard(headPos, applePos, snakePos, board)
         PrintBoard(board)
-        while True:
-            input = CheckInput(direction)
-            if input != [0, 0]:
-                wait(0.2)
-                direction = input.copy()
-                break
+        input = CheckInput(direction)
+        if input != [0, 0]:
+            direction = input.copy()
+            wait(0.5)
+
         os.system('cls' if os.name == 'nt' else 'clear')
     os.system('cls' if os.name == 'nt' else 'clear')
     print(f"You lost! Your score was {length}")
