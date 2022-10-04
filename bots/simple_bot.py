@@ -2,7 +2,6 @@ import random
 from time import sleep as wait
 from termcolor import colored
 import os
-import keyboard
 
 def ChooseApplePosition(snakePos):
     pos = [random.randint(1, 17), random.randint(1, 17)]
@@ -41,19 +40,6 @@ def PrintBoard(board):
             boardStr += "  " + content
     print(boardStr)
 
-def CheckInput(direction):
-    for i in range(50):
-        wait(0.01)
-        if keyboard.is_pressed('w') and direction != [0, 1]:
-            return [0, -1]
-        if keyboard.is_pressed('a') and direction != [1, 0]:
-            return [-1, 0]
-        if keyboard.is_pressed('s') and direction != [0, -1]:
-            return [0, 1]
-        if keyboard.is_pressed('d') and direction != [-1, 0]:
-            return [1, 0]
-    return [0, 0]
-
 def CheckDeath(headPos, snakePos):
     bodyPos = snakePos.copy()
     bodyPos.remove(headPos)
@@ -64,6 +50,39 @@ def CheckDeath(headPos, snakePos):
     if isOffScreen:
         return True
     return False
+
+def CheckPotentialDeath(newHeadPos, snakePos):
+    if newHeadPos in snakePos:
+        return True
+
+    isOffScreen = not (0 < newHeadPos[0] < 18) or not (0 < newHeadPos[1] < 18)
+    if isOffScreen:
+        return True
+    return False
+
+def GenerateInput(direction, applePos, headPos, snakePos):
+    choices = [[1, 0], [-1, 0], [0, 1], [0, -1]]
+    input = ChooseInput(applePos, headPos)
+    while input == [-1 * direction[0], -1 * direction[1]] or CheckPotentialDeath([headPos[0] + input[0], headPos[1] + input[1]], snakePos):
+        if len(choices) > 0:
+            input = random.choice(choices)
+            choices.remove(input)
+        else:
+            return [2, 2]
+    return input
+
+def ChooseInput(applePos, headPos):
+    input = [0, 0]
+    if applePos[0] < headPos[0]:
+        input[0] = -1
+    elif applePos[0] > headPos[0]:
+        input[0] = 1
+    else:
+        if applePos[1] < headPos[1]:
+            input[1] = -1
+        elif applePos[1] > headPos[1]:
+            input[1] = 1
+    return input
 
 def Main():
     os.system('cls' if os.name == 'nt' else 'clear')
@@ -85,13 +104,14 @@ def Main():
             break
         UpdateBoard(headPos, applePos, snakePos, board)
         PrintBoard(board)
-        input = CheckInput(direction)
-        if input != [0, 0]:
-            direction = input.copy()
-            wait(0.5)
-
+        direction = GenerateInput(direction, applePos, headPos, snakePos)
+        if direction == [2, 2]:
+            break
+        wait(0.2)
         os.system('cls' if os.name == 'nt' else 'clear')
-    print(f"\nYou lost! Your score was {length-2}")
+    os.system('cls' if os.name == 'nt' else 'clear')
+    print(f"You lost! Your score was {length-2}")
+    return length-2
 
 if __name__ == '__main__':
     Main()
