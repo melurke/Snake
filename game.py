@@ -2,7 +2,7 @@ import random
 from time import sleep as wait
 from termcolor import colored
 import os
-os.system('cls' if os.name == 'nt' else 'clear')
+import keyboard
 
 def ChooseApplePosition(snakePos):
     pos = [random.randint(1, 17), random.randint(1, 17)]
@@ -41,7 +41,20 @@ def PrintBoard(board):
             boardStr += "  " + content
     print(boardStr)
 
+def CheckInput():
+    if keyboard.is_pressed('w'):
+        return [0, -1]
+    if keyboard.is_pressed('a'):
+        return [-1, 0]
+    if keyboard.is_pressed('s'):
+        return [0, 1]
+    if keyboard.is_pressed('d'):
+        return [1, 0]
+    return [0, 0]
+
 def Main():
+    os.system('cls' if os.name == 'nt' else 'clear')
+
     length = 1
     applePos = [10, 9]
     headPos = [9, 9]
@@ -53,11 +66,16 @@ def Main():
         headPos[0] += direction[0]
         headPos[1] += direction[1]
         snakePos.append(headPos.copy())
-        
+
         applePos = EatApple(headPos, snakePos, applePos, length)
         UpdateBoard(headPos, applePos, snakePos, board)
         PrintBoard(board)
-        wait(1)
+        while True:
+            input = CheckInput()
+            if input != [0, 0]:
+                wait(0.2)
+                break
+        direction = input.copy()
         os.system('cls' if os.name == 'nt' else 'clear')
 
 if __name__ == '__main__':
