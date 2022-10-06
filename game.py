@@ -4,6 +4,9 @@ from termcolor import colored
 import os
 import keyboard
 
+def ClearScreen():
+    os.system('cls' if os.name == 'nt' else 'clear')
+
 def ChooseApplePosition(snakePos):
     pos = [random.randint(1, 17), random.randint(1, 17)]
     while pos in snakePos:
@@ -39,6 +42,7 @@ def PrintBoard(board):
             boardStr += "  " + colored(content, "green")
         else:
             boardStr += "  " + content
+    ClearScreen()
     print(boardStr)
 
 def CheckInput(direction):
@@ -66,8 +70,6 @@ def CheckDeath(headPos, snakePos):
     return False
 
 def Main():
-    os.system('cls' if os.name == 'nt' else 'clear')
-
     length = 1
     applePos = [10, 9]
     headPos = [9, 9]
@@ -89,8 +91,6 @@ def Main():
         if input != [0, 0]:
             direction = input.copy()
             wait(0.5)
-
-        os.system('cls' if os.name == 'nt' else 'clear')
     print(f"\nYou lost! Your score was {length-2}")
 
 if __name__ == '__main__':

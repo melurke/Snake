@@ -3,6 +3,9 @@ from time import sleep as wait
 from termcolor import colored
 import os
 
+def ClearScreen():
+    os.system('cls' if os.name == 'nt' else 'clear')
+
 def ChooseApplePosition(snakePos):
     pos = [random.randint(1, 17), random.randint(1, 17)]
     while pos in snakePos:
@@ -38,6 +41,7 @@ def PrintBoard(board):
             boardStr += "  " + colored(content, "green")
         else:
             boardStr += "  " + content
+    ClearScreen()
     print(boardStr)
 
 def CheckDeath(headPos, snakePos):
@@ -61,8 +65,6 @@ def ChooseInput():
     return random.choice([[1, 0], [-1, 0], [0, 1], [0, -1]])
 
 def Main():
-    os.system('cls' if os.name == 'nt' else 'clear')
-
     length = 1
     applePos = [10, 9]
     headPos = [9, 9]
@@ -82,7 +84,6 @@ def Main():
         PrintBoard(board)
         direction = GenerateInput(direction)
         wait(0.2)
-        os.system('cls' if os.name == 'nt' else 'clear')
     print(f"\nYou lost! Your score was {length-2}")
     return length-2
 
