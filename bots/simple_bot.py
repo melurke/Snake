@@ -62,8 +62,8 @@ def CheckPotentialDeath(newHeadPos, snakePos):
 
 def GenerateInput(direction, applePos, headPos, snakePos):
     choices = [[1, 0], [-1, 0], [0, 1], [0, -1]]
-    input = ChooseInput(applePos, headPos)
-    while input == [-1 * direction[0], -1 * direction[1]] or CheckPotentialDeath([headPos[0] + input[0], headPos[1] + input[1]], snakePos):
+    input = ChooseInput(applePos, headPos, direction, snakePos)
+    while not ValidateInput(input, direction, headPos, snakePos):
         if len(choices) > 0:
             input = random.choice(choices)
             choices.remove(input)
@@ -71,7 +71,12 @@ def GenerateInput(direction, applePos, headPos, snakePos):
             return [2, 2]
     return input
 
-def ChooseInput(applePos, headPos):
+def ValidateInput(input, direction, headPos, snakePos):
+    if input == [-1 * direction[0], -1 * direction[1]] or CheckPotentialDeath([headPos[0] + input[0], headPos[1] + input[1]], snakePos):
+        return False
+    return True
+
+def ChooseInput(applePos, headPos, direction, snakePos):
     input = [0, 0]
     if applePos[0] < headPos[0]:
         input[0] = -1
@@ -82,6 +87,17 @@ def ChooseInput(applePos, headPos):
             input[1] = -1
         elif applePos[1] > headPos[1]:
             input[1] = 1
+    if not ValidateInput(input, direction, headPos, snakePos):
+        input = [0, 0]
+        if applePos[1] < headPos[1]:
+            input[1] = -1
+        elif applePos[1] > headPos[1]:
+            input[1] = 1
+        else:
+            if applePos[0] < headPos[0]:
+                input[0] = -1
+            elif applePos[0] > headPos[0]:
+                input[0] = 1
     return input
 
 def Main():
