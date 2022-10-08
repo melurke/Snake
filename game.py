@@ -89,8 +89,8 @@ def Main():
             break
         UpdateBoard(headPos, applePos, snakePos, board) # Update the board with all the new fields
         PrintBoard(board) # Print the board to the terminal
-        direction = CheckInput(direction) # Check for player input and update the direction
         wait(0.5) # Wait for half a second so the player can't spam inputs
+        direction = CheckInput(direction) # Check for player input and update the direction
     print(f"\nYou lost! Your score was {length-2}") # Print the score after the game is lost
 
 if __name__ == '__main__':
