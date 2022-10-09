@@ -97,7 +97,7 @@ def Game(): # Play one game at a time
     return length - 2
 
 def Main():
-    numOfGames = 100000
+    numOfGames = 1000000
     games = RunGames(numOfGames)
     average, distribution = ProcessGames(games)
     SaveResults(numOfGames, average, distribution, "data/simple_bot/results.txt")
