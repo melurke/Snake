@@ -9,9 +9,9 @@ def ClearScreen(): # Clear the screen so the game field is only shown once at a 
     os.system('cls' if os.name == 'nt' else 'clear')
 
 def ChooseApplePosition(snakePos): # Choose a new position for the apple after it is eaten
-    pos = [random.randint(1, 17), random.randint(1, 17)]
+    pos = [random.randint(1, 16), random.randint(1, 16)]
     while pos in snakePos:
-        pos = [random.randint(1, 17), random.randint(1, 17)]
+        pos = [random.randint(1, 16), random.randint(1, 16)]
     return pos
 
 def EatApple(headPos, snakePos, applePos, length): # Lengthen the snake if the apple is eaten and choose a new position for it
@@ -23,8 +23,8 @@ def EatApple(headPos, snakePos, applePos, length): # Lengthen the snake if the a
     return applePos, length
 
 def UpdateBoard(headPos, applePos, snakePos, board): # Update all the fields on the board
-    for y in range(1, 18):
-        for x in range(1, 18):
+    for y in range(1, 17):
+        for x in range(1, 17):
             pos = [x, y]
             if pos == applePos:   content = "*"
             elif pos == headPos:  content = "#"
@@ -35,7 +35,7 @@ def UpdateBoard(headPos, applePos, snakePos, board): # Update all the fields on 
 def PrintBoard(board): # Clear the terminal and print the new board
     boardStr = ""
     for i, content in enumerate(board):
-        if i % 17 == 0:
+        if i % 16 == 0:
             boardStr += "\n"
         if content == "*":
             boardStr += "  " + colored(content, "red")
@@ -65,7 +65,7 @@ def CheckDeath(headPos, snakePos): # Check if the snake is outside of the board 
     if headPos in bodyPos:
         return True
 
-    isOffScreen = not (0 < headPos[0] < 18) or not (0 < headPos[1] < 18)
+    isOffScreen = not (0 < headPos[0] < 17) or not (0 < headPos[1] < 17)
     if isOffScreen:
         return True
     return False

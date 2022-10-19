@@ -56,54 +56,18 @@ def CheckDeath(headPos, snakePos): # Check if the snake is outside of the board 
         return True
     return False
 
-def CheckPotentialDeath(newHeadPos, snakePos): # For a given input, check if the snake would die if it made that move
-    if newHeadPos in snakePos:
-        return True
-
-    isOffScreen = not (0 < newHeadPos[0] < 17) or not (0 < newHeadPos[1] < 17)
-    if isOffScreen:
-        return True
-    return False
-
-def ChooseInput(applePos, headPos, direction, snakePos): # Choose the input that would get the snake closest to the apple
-    input = [0, 0]
-    if applePos[0] < headPos[0]:
-        input[0] = -1
-    elif applePos[0] > headPos[0]:
-        input[0] = 1
-    else:
-        if applePos[1] < headPos[1]:
-            input[1] = -1
-        elif applePos[1] > headPos[1]:
-            input[1] = 1
-    if not ValidateInput(input, direction, headPos, snakePos):
-        input = [0, 0]
-        if applePos[1] < headPos[1]:
-            input[1] = -1
-        elif applePos[1] > headPos[1]:
-            input[1] = 1
-        else:
-            if applePos[0] < headPos[0]:
-                input[0] = -1
-            elif applePos[0] > headPos[0]:
-                input[0] = 1
-    return input
-
-def GenerateInput(direction, applePos, headPos, snakePos): # Choose an appropriate input if possible and if not, choose a random one
-    choices = [[1, 0], [-1, 0], [0, 1], [0, -1]]
-    input = ChooseInput(applePos, headPos, direction, snakePos)
-    while not ValidateInput(input, direction, headPos, snakePos):
-        if len(choices) > 0:
-            input = random.choice(choices)
-            choices.remove(input)
-        else:
-            return [2, 2]
-    return input
-
-def ValidateInput(input, direction, headPos, snakePos): # Make shure the snake doesn't do a 180 turn or would die for a given input
-    if input == [-1 * direction[0], -1 * direction[1]] or CheckPotentialDeath([headPos[0] + input[0], headPos[1] + input[1]], snakePos):
-        return False
-    return True
+def GenerateInput(headPos, rightPos, downPos, upPos, leftPos, direction):
+    if headPos == [10, 9]:
+        return [0, -1]
+    if headPos in rightPos:
+        return [1, 0]
+    if headPos in leftPos:
+        return [-1, 0]
+    if headPos in upPos:
+        return [0, -1]
+    if headPos in downPos:
+        return [0, 1]
+    return direction
 
 def Main():
     length = 1
@@ -111,6 +75,11 @@ def Main():
     headPos = [9, 9]
     snakePos = [headPos.copy()]
     direction = [1, 0]
+
+    rightPos = [[1, 16], [2, 2], [3, 16], [4, 2], [5, 16], [6, 2], [7, 16], [8, 2], [9, 16], [10, 2], [11, 16], [12, 2], [13, 16], [14, 2], [15, 16]]
+    upPos = [[2, 16], [4, 16], [6, 16], [8, 16], [10, 16], [12, 16], [14, 16], [16, 16]]
+    leftPos = [[16, 1]]
+    downPos = [[1, 1], [3, 2], [5, 2], [7, 2], [9, 2], [11, 2], [13, 2], [15, 2]]
 
     while True:
         board = []
@@ -122,14 +91,13 @@ def Main():
 
         if CheckDeath(headPos, snakePos): # Check for death and end the game if neccessary
             break
-        UpdateBoard(headPos, applePos, snakePos, board) # Update the board with all the fields
+        UpdateBoard(headPos, applePos, snakePos, board) # Update the board with all the new fields
+        print(length-2)
         PrintBoard(board) # Print the board to the terminal
-        direction = GenerateInput(direction, applePos, headPos, snakePos) # Update the direction with the generated one
-        if direction == [2, 2]: # End the game if no more move is possible
-            break
-        # wait(0.2) # Wait 0.2 seconds for visibility
-    ClearScreen() # Clear the screen after losing
-    print(f"You lost! Your score was {length-2}") # Print the score after the game is lost
+        direction = GenerateInput(headPos, rightPos, downPos, upPos, leftPos, direction) # Generate a new direction randomly
+        wait(0.005) # Wait 0.2 seconds for visibility
+    print(f"\nYou lost! Your score was {length-2}") # Print the score after the game is lost
+    return length-2
 
 if __name__ == '__main__':
     Main() # Run the main function
