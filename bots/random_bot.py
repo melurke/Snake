@@ -31,7 +31,7 @@ def UpdateBoard(headPos, applePos, snakePos, board): # Update all the fields on 
             else:                 content = "O"
             board.append(content)
 
-def PrintBoard(board): # Clear the terminal and print the new board
+def PrintBoard(board, length): # Clear the terminal and print the new board
     boardStr = ""
     for i, content in enumerate(board):
         if i % 16 == 0:
@@ -44,6 +44,7 @@ def PrintBoard(board): # Clear the terminal and print the new board
             boardStr += "  " + content
     ClearScreen()
     print(boardStr)
+    print(f"\nScore: {length-2}")
 
 def CheckDeath(headPos, snakePos): # Check if the snake is outside of the board or intersecting itself
     bodyPos = snakePos.copy()
@@ -83,7 +84,7 @@ def Main():
         if CheckDeath(headPos, snakePos): # Check for death and end the game if neccessary
             break
         UpdateBoard(headPos, applePos, snakePos, board) # Update the board with all the new fields
-        PrintBoard(board) # Print the board to the terminal
+        PrintBoard(board, length) # Print the board to the terminal
         direction = GenerateInput(direction) # Generate a new direction randomly
         wait(0.2) # Wait 0.2 seconds for visibility
     print(f"\nYou lost! Your score was {length-2}") # Print the score after the game is lost
