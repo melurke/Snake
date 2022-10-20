@@ -41,13 +41,11 @@ For some reason, the bot seems to score even numbers of scores much more that od
 
 The Dijkstra Bot uses the Dijkstra Algorithm, that counts the number of steps it takes to get to the apple for each field and lets the snake move to the smallest number near it. The numbers are also printed on the field while the bot is playing, so it is easier to see which path the bot is following.
 
-We are planning to improve the bot so it tries to avoid moves that enclose a large area, so the bot doesn't get trapped as often.
-
 #### Data
 
-Average: 50.22
+Average: 49.0
 
-For now, we only ran 100 games, because the bot takes very much computation time, but we are planning to run many more games, when the bot is finalized.
+For now, we only ran 200 games, because the bot takes very much computation time, but we are planning to run many more games as soon as we have the time.
 
 
 ### Hamiltonian Bot

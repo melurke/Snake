@@ -1,5 +1,4 @@
 # Import packages
-from lib2to3.pytree import NegatedPattern
 import random
 from time import sleep as wait
 from termcolor import colored
