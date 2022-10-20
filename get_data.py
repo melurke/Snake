@@ -3,7 +3,7 @@ import random
 import matplotlib.pyplot as plt
 
 # Import generation functions from all the bots
-from bots.random_bot import GenerateInput
+from bots.dijkstra_bot import GenerateInput, GenerateDijkstraValues
 
 def ChooseApplePosition(snakePos): # Choose a new position for the apple after it is eaten
     pos = [random.randint(1, 16), random.randint(1, 16)]
@@ -91,16 +91,17 @@ def Game(): # Play one game at a time
 
         if CheckDeath(headPos, snakePos): # Check for death and end the game if neccessary
             break
-        direction = GenerateInput(direction) # Update the direction with the generated one
+        values = GenerateDijkstraValues(applePos, snakePos)
+        direction = GenerateInput(headPos, values) # Update the direction with the generated one
         if direction == [2, 2]: # End the game if no more move is possible
             break
     return length - 2
 
 def Main():
-    numOfGames = 1000000
+    numOfGames = 100
     games = RunGames(numOfGames)
     average, distribution = ProcessGames(games)
-    SaveResults(numOfGames, average, distribution, "data/random_bot/results.txt")
+    SaveResults(numOfGames, average, distribution, "data/dijkstra_bot/results.txt")
 
 if __name__ == '__main__':
     Main() # Run the main function

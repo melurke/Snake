@@ -111,7 +111,7 @@ def CheckPotentialDeath(newHeadPos, snakePos): # For a given input, check if the
         return True
     return False
 
-def GenerateInput(direction, headPos, values): # Choose an appropriate input if possible and if not, choose a random one
+def GenerateInput(headPos, values): # Choose an appropriate input if possible and if not, choose a random one
     headNeighbors = GenerateNeighbors(headPos)
     inputValue = values[headNeighbors[0][0] + 16 * (headNeighbors[0][1] - 1) - 1]
     inputNeighbor = headNeighbors[0]
@@ -142,7 +142,7 @@ def Main():
             break
         values = UpdateBoard(headPos, applePos, snakePos, board) # Update the board with all the fields
         PrintBoard(board, length) # Print the board to the terminal
-        direction = GenerateInput(direction, headPos, values) # Update the direction with the generated one
+        direction = GenerateInput(headPos, values) # Update the direction with the generated one
         if direction == [2, 2]: # End the game if no more move is possible
             break
         wait(0.1) # Wait 0.2 seconds for visibility
