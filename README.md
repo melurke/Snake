@@ -52,3 +52,9 @@ For now, we only ran 200 games, because the bot takes very much computation time
 
 The Hamiltonian Bot follows a simple Hamiltonian Cycle and thus always scores 253, the maximum possible score in (our version of) the game.
 It is most certainly not the most efficient bot accounting for the number of steps taken, but the absolute score is optimal.
+
+## What's up for the future?
+
+In the future, we plan to implement the programs into pygame, so the visuals are a bit easier to the eye.
+Another thing we want to try is changing the playing field from a square to a torus, meaning that you come out the other side when going into a wall. We're excited to see how that changes the results of the different bots.
+We also want to program a new bot with a neural network using NEAT (https://en.wikipedia.org/wiki/Neuroevolution_of_augmenting_topologies). That would be our first real experience with AI and we're looking forward to seeing how that will go.
