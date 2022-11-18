@@ -104,4 +104,7 @@ def Main():
     SaveResults(numOfGames, average, distribution, "data/dijkstra_bot/results.txt")
 
 if __name__ == '__main__':
-    Main() # Run the main function
+    try:
+        Main() # Run the main function
+    except:
+        pass

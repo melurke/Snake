@@ -149,4 +149,7 @@ def Main():
     print(f"You lost! Your score was {length-2}") # Print the score after the game is lost
 
 if __name__ == '__main__':
-    Main() # Run the main function
+    try:
+        Main() # Run the main function
+    except:
+        pass

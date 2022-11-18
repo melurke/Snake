@@ -100,4 +100,7 @@ def Main():
     return length-2
 
 if __name__ == '__main__':
-    Main() # Run the main function
+    try:
+        Main() # Run the main function
+    except:
+        pass
