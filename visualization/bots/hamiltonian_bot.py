@@ -3,7 +3,6 @@ import random
 from time import sleep as wait
 from termcolor import colored
 import os
-import keyboard
 
 def ClearScreen(): # Clear the screen so the game field is only shown once at a time
     os.system('cls' if os.name == 'nt' else 'clear')
@@ -26,10 +25,10 @@ def UpdateBoard(headPos, applePos, snakePos, board): # Update all the fields on 
     for y in range(1, 17):
         for x in range(1, 17):
             pos = [x, y]
-            if pos == applePos:   content = "*"
-            elif pos == headPos:  content = "#"
-            elif pos in snakePos: content = "+"
-            else:                 content = "O"
+            if pos == applePos:   content = "*" # Apple
+            elif pos == headPos:  content = "#" # Head
+            elif pos in snakePos: content = "+" # Body
+            else:                 content = "O" # Empty field
             board.append(content)
     return [board]
 
@@ -48,19 +47,6 @@ def PrintBoard(board, length): # Clear the terminal and print the new board
     print(boardStr)
     print(f"\nScore: {length-2}")
 
-def CheckInput(direction): # Wait for ~0.5 seconds and continuously check for player input
-    for i in range(50):
-        wait(0.01)
-        if keyboard.is_pressed('w') and direction != [0, 1]:
-            return [0, -1]
-        if keyboard.is_pressed('a') and direction != [1, 0]:
-            return [-1, 0]
-        if keyboard.is_pressed('s') and direction != [0, -1]:
-            return [0, 1]
-        if keyboard.is_pressed('d') and direction != [-1, 0]:
-            return [1, 0]
-    return direction
-
 def CheckDeath(headPos, snakePos): # Check if the snake is outside of the board or intersecting itself
     bodyPos = snakePos.copy()
     bodyPos.remove(headPos)
@@ -72,12 +58,30 @@ def CheckDeath(headPos, snakePos): # Check if the snake is outside of the board 
         return True
     return False
 
+def GenerateInput(headPos, rightPos, downPos, upPos, leftPos, direction):
+    if headPos == [10, 9]:
+        return [0, -1]
+    if headPos in rightPos:
+        return [1, 0]
+    if headPos in leftPos:
+        return [-1, 0]
+    if headPos in upPos:
+        return [0, -1]
+    if headPos in downPos:
+        return [0, 1]
+    return direction
+
 def Main():
     length = 1
     applePos = [10, 9]
     headPos = [9, 9]
     snakePos = [headPos.copy()]
     direction = [1, 0]
+
+    rightPos = [[1, 16], [2, 2], [3, 16], [4, 2], [5, 16], [6, 2], [7, 16], [8, 2], [9, 16], [10, 2], [11, 16], [12, 2], [13, 16], [14, 2], [15, 16]]
+    upPos = [[2, 16], [4, 16], [6, 16], [8, 16], [10, 16], [12, 16], [14, 16], [16, 16]]
+    leftPos = [[16, 1]]
+    downPos = [[1, 1], [3, 2], [5, 2], [7, 2], [9, 2], [11, 2], [13, 2], [15, 2]]
 
     while True:
         board = []
@@ -91,9 +95,10 @@ def Main():
             break
         UpdateBoard(headPos, applePos, snakePos, board) # Update the board with all the new fields
         PrintBoard(board, length) # Print the board to the terminal
-        wait(0.5) # Wait for half a second so the player can't spam inputs
-        direction = CheckInput(direction) # Check for player input and update the direction
+        direction = GenerateInput(headPos, rightPos, downPos, upPos, leftPos, direction) # Generate a new direction randomly
+        wait(0.005) # Wait a short amount of time for visibility
     print(f"\nYou lost! Your score was {length-2}") # Print the score after the game is lost
+    return length-2
 
 if __name__ == '__main__':
     try:

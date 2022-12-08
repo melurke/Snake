@@ -3,7 +3,6 @@ import random
 from time import sleep as wait
 from termcolor import colored
 import os
-import keyboard
 
 def ClearScreen(): # Clear the screen so the game field is only shown once at a time
     os.system('cls' if os.name == 'nt' else 'clear')
@@ -42,24 +41,10 @@ def PrintBoard(board, length): # Clear the terminal and print the new board
             boardStr += "  " + colored(content, "red")
         elif content != "O":
             boardStr += "  " + colored(content, "green")
-        else:
-            boardStr += "  " + content
+        else: boardStr += "  " + content
     ClearScreen()
     print(boardStr)
     print(f"\nScore: {length-2}")
-
-def CheckInput(direction): # Wait for ~0.5 seconds and continuously check for player input
-    for i in range(50):
-        wait(0.01)
-        if keyboard.is_pressed('w') and direction != [0, 1]:
-            return [0, -1]
-        if keyboard.is_pressed('a') and direction != [1, 0]:
-            return [-1, 0]
-        if keyboard.is_pressed('s') and direction != [0, -1]:
-            return [0, 1]
-        if keyboard.is_pressed('d') and direction != [-1, 0]:
-            return [1, 0]
-    return direction
 
 def CheckDeath(headPos, snakePos): # Check if the snake is outside of the board or intersecting itself
     bodyPos = snakePos.copy()
@@ -71,6 +56,55 @@ def CheckDeath(headPos, snakePos): # Check if the snake is outside of the board 
     if isOffScreen:
         return True
     return False
+
+def CheckPotentialDeath(newHeadPos, snakePos): # For a given input, check if the snake would die if it made that move
+    if newHeadPos in snakePos:
+        return True
+
+    isOffScreen = not (0 < newHeadPos[0] < 17) or not (0 < newHeadPos[1] < 17)
+    if isOffScreen:
+        return True
+    return False
+
+def ChooseInput(applePos, headPos, direction, snakePos): # Choose the input that would get the snake closest to the apple
+    input = [0, 0]
+    if applePos[0] < headPos[0]:
+        input[0] = -1
+    elif applePos[0] > headPos[0]:
+        input[0] = 1
+    else:
+        if applePos[1] < headPos[1]:
+            input[1] = -1
+        elif applePos[1] > headPos[1]:
+            input[1] = 1
+    if not ValidateInput(input, direction, headPos, snakePos):
+        input = [0, 0]
+        if applePos[1] < headPos[1]:
+            input[1] = -1
+        elif applePos[1] > headPos[1]:
+            input[1] = 1
+        else:
+            if applePos[0] < headPos[0]:
+                input[0] = -1
+            elif applePos[0] > headPos[0]:
+                input[0] = 1
+    return input
+
+def GenerateInput(direction, applePos, headPos, snakePos): # Choose an appropriate input if possible and if not, choose a random one
+    choices = [[1, 0], [-1, 0], [0, 1], [0, -1]]
+    input = ChooseInput(applePos, headPos, direction, snakePos)
+    while not ValidateInput(input, direction, headPos, snakePos):
+        if len(choices) > 0:
+            input = random.choice(choices)
+            choices.remove(input)
+        else:
+            return [2, 2]
+    return input
+
+def ValidateInput(input, direction, headPos, snakePos): # Make shure the snake doesn't do a 180 turn or would die for a given input
+    if input == [-1 * direction[0], -1 * direction[1]] or CheckPotentialDeath([headPos[0] + input[0], headPos[1] + input[1]], snakePos):
+        return False
+    return True
 
 def Main():
     length = 1
@@ -89,14 +123,14 @@ def Main():
 
         if CheckDeath(headPos, snakePos): # Check for death and end the game if neccessary
             break
-        UpdateBoard(headPos, applePos, snakePos, board) # Update the board with all the new fields
+        UpdateBoard(headPos, applePos, snakePos, board) # Update the board with all the fields
         PrintBoard(board, length) # Print the board to the terminal
-        wait(0.5) # Wait for half a second so the player can't spam inputs
-        direction = CheckInput(direction) # Check for player input and update the direction
-    print(f"\nYou lost! Your score was {length-2}") # Print the score after the game is lost
+        direction = GenerateInput(direction, applePos, headPos, snakePos) # Update the direction with the generated one
+        if direction == [2, 2]: # End the game if no more move is possible
+            break
+        wait(0.2) # Wait 0.2 seconds for visibility
+    ClearScreen() # Clear the screen after losing
+    print(f"You lost! Your score was {length-2}") # Print the score after the game is lost
 
 if __name__ == '__main__':
-    try:
-        Main() # Run the main function
-    except:
-        pass
+    Main() # Run the main function
