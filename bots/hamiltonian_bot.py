@@ -25,10 +25,10 @@ def UpdateBoard(headPos, applePos, snakePos, board): # Update all the fields on 
     for y in range(1, 17):
         for x in range(1, 17):
             pos = [x, y]
-            if pos == applePos:   content = "*"
-            elif pos == headPos:  content = "#"
-            elif pos in snakePos: content = "+"
-            else:                 content = "O"
+            if pos == applePos:   content = "*" # Apple
+            elif pos == headPos:  content = "#" # Head
+            elif pos in snakePos: content = "+" # Body
+            else:                 content = "O" # Empty field
             board.append(content)
 
 def PrintBoard(board, length): # Clear the terminal and print the new board
@@ -95,7 +95,7 @@ def Main():
         UpdateBoard(headPos, applePos, snakePos, board) # Update the board with all the new fields
         PrintBoard(board, length) # Print the board to the terminal
         direction = GenerateInput(headPos, rightPos, downPos, upPos, leftPos, direction) # Generate a new direction randomly
-        wait(0.005) # Wait 0.2 seconds for visibility
+        wait(0.005) # Wait a short amount of time for visibility
     print(f"\nYou lost! Your score was {length-2}") # Print the score after the game is lost
     return length-2
 

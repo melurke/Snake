@@ -40,8 +40,7 @@ def PrintBoard(board, length): # Clear the terminal and print the new board
             boardStr += "  " + colored(content, "red")
         elif content != "O":
             boardStr += "  " + colored(content, "green")
-        else:
-            boardStr += "  " + content
+        else: boardStr += "  " + content
     ClearScreen()
     print(boardStr)
     print(f"\nScore: {length-2}")
@@ -128,7 +127,7 @@ def Main():
         direction = GenerateInput(direction, applePos, headPos, snakePos) # Update the direction with the generated one
         if direction == [2, 2]: # End the game if no more move is possible
             break
-        # wait(0.2) # Wait 0.2 seconds for visibility
+        wait(0.2) # Wait 0.2 seconds for visibility
     ClearScreen() # Clear the screen after losing
     print(f"You lost! Your score was {length-2}") # Print the score after the game is lost
 
