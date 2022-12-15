@@ -1,5 +1,7 @@
 # Import packages
 import random
+from time import sleep as wait
+import pygame
 
 def ChooseApplePosition(snakePos): # Choose a new position for the apple after it is eaten
     pos = [random.randint(1, 16), random.randint(1, 16)]
@@ -19,12 +21,35 @@ def UpdateBoard(headPos, applePos, snakePos, board): # Update all the fields on 
     for y in range(1, 17):
         for x in range(1, 17):
             pos = [x, y]
-            if pos == applePos:   content = 1
-            elif pos == headPos:  content = 2
-            elif pos in snakePos: content = 3
-            else:                 content = 0
+            if pos == applePos:   content = "*"
+            elif pos == headPos:  content = "#"
+            elif pos in snakePos: content = "+"
+            else:                 content = "O"
             board.append(content)
-    return [board]
+
+def IndexToCoordinates(i):
+    x = i % 16
+    y = (i - i % 16) / 16
+    x *= 50
+    y *= 50
+    return (x, y)
+
+def PrintBoard(board, length, screen): # Clear the terminal and print the new board
+    for i, content in enumerate(board):
+        if content == "*":
+            coords = IndexToCoordinates(i)
+            AddRectangle(coords[0], coords[1], 255, 0, 0, screen)
+        elif content == "#":
+            coords = IndexToCoordinates(i)
+            AddRectangle(coords[0], coords[1], 0, 255, 0, screen)
+        elif content == "+":
+            coords = IndexToCoordinates(i)
+            AddRectangle(coords[0], coords[1], 0, 155, 0, screen)
+        else:
+            coords = IndexToCoordinates(i)
+            AddRectangle(coords[0], coords[1], 0, 0, 0, screen)
+    print(f"\nScore: {length-2}")
+    pygame.display.update()
 
 def CheckDeath(headPos, snakePos): # Check if the snake is outside of the board or intersecting itself
     bodyPos = snakePos.copy()
@@ -86,39 +111,37 @@ def ValidateInput(input, direction, headPos, snakePos): # Make shure the snake d
         return False
     return True
 
-def IndexToCoordinates(i):
-    x = i % 16
-    y = (i - i % 16) / 16
-    return [x, y]
+def AddRectangle(x, y, r, g, b, screen):
+    pygame.draw.rect(screen, (r, g, b),(x+1, y+1, 48, 48))
 
-def AnalyseBoard(board):
-    apple = []
-    head = []
-    snake = []
+def Main():
+    pygame.init()
+    screen = pygame.display.set_mode((800, 800))
+    pygame.display.set_caption('Snake Game')
 
-    for i, x in board:
-        if x == 1:
-            apple = IndexToCoordinates(i)
-        elif x == 2:
-            head = IndexToCoordinates(i)
-            snake.append(IndexToCoordinates(i))
-        elif x == 3:
-            snake.append(IndexToCoordinates(i))
-    return apple, head, snake
+    length = 1
+    applePos = [10, 9]
+    headPos = [9, 9]
+    snakePos = [headPos.copy()]
+    direction = [1, 0]
 
-def Main(board, direction):
+    while True:
+        board = []
+        # Update the position of the snake
+        headPos[0] += direction[0]
+        headPos[1] += direction[1]
+        snakePos.append(headPos.copy())
+        applePos, length = EatApple(headPos, snakePos, applePos, length) # Update length and apple position
 
-    applePos, headPos, snakePos = AnalyseBoard(board)
+        if CheckDeath(headPos, snakePos): # Check for death and end the game if neccessary
+            break
+        UpdateBoard(headPos, applePos, snakePos, board) # Update the board with all the fields
+        PrintBoard(board, length, screen) # Print the board to the terminal
+        direction = GenerateInput(direction, applePos, headPos, snakePos) # Update the direction with the generated one
+        if direction == [2, 2]: # End the game if no more move is possible
+            break
+        wait(0.2) # Wait 0.2 seconds for visibility
+    print(f"You lost! Your score was {length-2}") # Print the score after the game is lost
 
-    headPos[0] += direction[0]
-    headPos[1] += direction[1]
-    snakePos.append(headPos.copy())
-    applePos, length = EatApple(headPos, snakePos, applePos, length) # Update length and apple position
-
-    if CheckDeath(headPos, snakePos): # Check for death and end the game if neccessary
-        return []
-    board = UpdateBoard(headPos, applePos, snakePos, board) # Update the board with all the fields
-    direction = GenerateInput(direction, applePos, headPos, snakePos) # Update the direction with the generated one
-    if direction == [2, 2]: # End the game if no more move is possible
-        return []
-    return [board, direction]
+if __name__ == '__main__':
+    Main() # Run the main function
