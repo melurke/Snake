@@ -1,11 +1,5 @@
 # Import packages
 import random
-from time import sleep as wait
-from termcolor import colored
-import os
-
-def ClearScreen(): # Clear the screen so the game field is only shown once at a time
-    os.system('cls' if os.name == 'nt' else 'clear')
 
 def ChooseApplePosition(snakePos): # Choose a new position for the apple after it is eaten
     pos = [random.randint(1, 16), random.randint(1, 16)]
@@ -25,26 +19,12 @@ def UpdateBoard(headPos, applePos, snakePos, board): # Update all the fields on 
     for y in range(1, 17):
         for x in range(1, 17):
             pos = [x, y]
-            if pos == applePos:   content = "*"
-            elif pos == headPos:  content = "#"
-            elif pos in snakePos: content = "+"
-            else:                 content = "O"
+            if pos == applePos:   content = 1
+            elif pos == headPos:  content = 2
+            elif pos in snakePos: content = 3
+            else:                 content = 0
             board.append(content)
     return [board]
-
-def PrintBoard(board, length): # Clear the terminal and print the new board
-    boardStr = ""
-    for i, content in enumerate(board):
-        if i % 16 == 0:
-            boardStr += "\n"
-        if content == "*":
-            boardStr += "  " + colored(content, "red")
-        elif content != "O":
-            boardStr += "  " + colored(content, "green")
-        else: boardStr += "  " + content
-    ClearScreen()
-    print(boardStr)
-    print(f"\nScore: {length-2}")
 
 def CheckDeath(headPos, snakePos): # Check if the snake is outside of the board or intersecting itself
     bodyPos = snakePos.copy()
@@ -106,31 +86,39 @@ def ValidateInput(input, direction, headPos, snakePos): # Make shure the snake d
         return False
     return True
 
-def Main():
-    length = 1
-    applePos = [10, 9]
-    headPos = [9, 9]
-    snakePos = [headPos.copy()]
-    direction = [1, 0]
+def IndexToCoordinates(i):
+    x = i % 16
+    y = (i - i % 16) / 16
+    return [x, y]
 
-    while True:
-        board = []
-        # Update the position of the snake
-        headPos[0] += direction[0]
-        headPos[1] += direction[1]
-        snakePos.append(headPos.copy())
-        applePos, length = EatApple(headPos, snakePos, applePos, length) # Update length and apple position
+def AnalyseBoard(board):
+    apple = []
+    head = []
+    snake = []
 
-        if CheckDeath(headPos, snakePos): # Check for death and end the game if neccessary
-            break
-        UpdateBoard(headPos, applePos, snakePos, board) # Update the board with all the fields
-        PrintBoard(board, length) # Print the board to the terminal
-        direction = GenerateInput(direction, applePos, headPos, snakePos) # Update the direction with the generated one
-        if direction == [2, 2]: # End the game if no more move is possible
-            break
-        wait(0.2) # Wait 0.2 seconds for visibility
-    ClearScreen() # Clear the screen after losing
-    print(f"You lost! Your score was {length-2}") # Print the score after the game is lost
+    for i, x in board:
+        if x == 1:
+            apple = IndexToCoordinates(i)
+        elif x == 2:
+            head = IndexToCoordinates(i)
+            snake.append(IndexToCoordinates(i))
+        elif x == 3:
+            snake.append(IndexToCoordinates(i))
+    return apple, head, snake
 
-if __name__ == '__main__':
-    Main() # Run the main function
+def Main(board, direction):
+
+    applePos, headPos, snakePos = AnalyseBoard(board)
+
+    headPos[0] += direction[0]
+    headPos[1] += direction[1]
+    snakePos.append(headPos.copy())
+    applePos, length = EatApple(headPos, snakePos, applePos, length) # Update length and apple position
+
+    if CheckDeath(headPos, snakePos): # Check for death and end the game if neccessary
+        return []
+    board = UpdateBoard(headPos, applePos, snakePos, board) # Update the board with all the fields
+    direction = GenerateInput(direction, applePos, headPos, snakePos) # Update the direction with the generated one
+    if direction == [2, 2]: # End the game if no more move is possible
+        return []
+    return [board, direction]

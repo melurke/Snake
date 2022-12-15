@@ -73,6 +73,7 @@ def Main(board, direction):
     headPos[0] += direction[0]
     headPos[1] += direction[1]
     snakePos.append(headPos.copy())
+    applePos, length = EatApple(headPos, snakePos, applePos, length)
 
     if CheckDeath(headPos, snakePos): # Check for death and end the game if neccessary
         return []

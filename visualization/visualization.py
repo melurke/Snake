@@ -6,8 +6,6 @@ screen = pg.display.set_mode((800, 800))
 pg.display.set_caption("Snake")
 
 board = []
-for i in range(256):
-    board.append(random.randint(0, 3))
 
 def BoardToColor(boardStr):
     if boardStr == 0:
