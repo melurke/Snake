@@ -98,7 +98,7 @@ def Game(): # Play one game at a time
     return length - 2
 
 def Main():
-    numOfGames = 1000000
+    numOfGames = 3000
     games = RunGames(numOfGames)
     average, distribution = ProcessGames(games)
     SaveResults(numOfGames, average, distribution, "data/dijkstra_bot/results.txt")
