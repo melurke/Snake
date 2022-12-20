@@ -1,11 +1,7 @@
 # Import packages
 import random
 from time import sleep as wait
-from termcolor import colored
-import os
-
-def ClearScreen(): # Clear the screen so the game field is only shown once at a time
-    os.system('cls' if os.name == 'nt' else 'clear')
+import pygame
 
 def ChooseApplePosition(snakePos): # Choose a new position for the apple after it is eaten
     pos = [random.randint(1, 16), random.randint(1, 16)]
@@ -31,20 +27,29 @@ def UpdateBoard(headPos, applePos, snakePos, board): # Update all the fields on 
             else:                 content = "O"
             board.append(content)
 
-def PrintBoard(board, length): # Clear the terminal and print the new board
-    boardStr = ""
+def IndexToCoordinates(i):
+    x = i % 16
+    y = (i - i % 16) / 16
+    x *= 50
+    y *= 50
+    return (x, y)
+
+def PrintBoard(board, length, screen): # Clear the terminal and print the new board
     for i, content in enumerate(board):
-        if i % 16 == 0:
-            boardStr += "\n"
         if content == "*":
-            boardStr += "  " + colored(content, "red")
-        elif content != "O":
-            boardStr += "  " + colored(content, "green")
+            coords = IndexToCoordinates(i)
+            AddRectangle(coords[0], coords[1], 255, 0, 0, screen)
+        elif content == "#":
+            coords = IndexToCoordinates(i)
+            AddRectangle(coords[0], coords[1], 0, 255, 0, screen)
+        elif content == "+":
+            coords = IndexToCoordinates(i)
+            AddRectangle(coords[0], coords[1], 0, 155, 0, screen)
         else:
-            boardStr += "  " + content
-    ClearScreen()
-    print(boardStr)
+            coords = IndexToCoordinates(i)
+            AddRectangle(coords[0], coords[1], 0, 0, 0, screen)
     print(f"\nScore: {length-2}")
+    pygame.display.update()
 
 def CheckDeath(headPos, snakePos): # Check if the snake is outside of the board or intersecting itself
     bodyPos = snakePos.copy()
@@ -66,7 +71,14 @@ def GenerateInput(direction): # Make shure that the snake can't do a 180 turn an
         input = ChooseInput()
     return input
 
+def AddRectangle(x, y, r, g, b, screen):
+    pygame.draw.rect(screen, (r, g, b),(x+1, y+1, 48, 48))
+
 def Main():
+    pygame.init()
+    screen = pygame.display.set_mode((800, 800))
+    pygame.display.set_caption('Snake Game')
+
     length = 1
     applePos = [10, 9]
     headPos = [9, 9]
@@ -84,11 +96,10 @@ def Main():
         if CheckDeath(headPos, snakePos): # Check for death and end the game if neccessary
             break
         UpdateBoard(headPos, applePos, snakePos, board) # Update the board with all the new fields
-        PrintBoard(board, length) # Print the board to the terminal
+        PrintBoard(board, length, screen) # Print the board to the terminal
         direction = GenerateInput(direction) # Generate a new direction randomly
         wait(0.2) # Wait 0.2 seconds for visibility
     print(f"\nYou lost! Your score was {length-2}") # Print the score after the game is lost
-    return length-2
 
 if __name__ == '__main__':
     Main() # Run the main function
