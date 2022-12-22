@@ -4,22 +4,23 @@ from time import sleep as wait
 import pygame
 
 def ChooseApplePosition(snakePos): # Choose a new position for the apple after it is eaten
-    pos = [random.randint(1, 16), random.randint(1, 16)]
+    pos = [random.randint(0, 15), random.randint(0, 15)]
     while pos in snakePos:
-        pos = [random.randint(1, 16), random.randint(1, 16)]
+        pos = [random.randint(0, 15), random.randint(0, 15)]
     return pos
 
 def EatApple(headPos, snakePos, applePos, length): # Lengthen the snake if the apple is eaten and choose a new position for it
     if headPos == applePos:
         length += 1
         applePos = ChooseApplePosition(snakePos)
+        print(f"Score: {length - 2}")
     else:
         snakePos.remove(snakePos[0])
     return applePos, length
 
 def UpdateBoard(headPos, applePos, snakePos, board): # Update all the fields on the board
-    for y in range(1, 17):
-        for x in range(1, 17):
+    for y in range(0, 16):
+        for x in range(0, 16):
             pos = [x, y]
             if pos == applePos:   content = "*"
             elif pos == headPos:  content = "#"
@@ -34,7 +35,7 @@ def IndexToCoordinates(i):
     y *= 50
     return (x, y)
 
-def PrintBoard(board, length, screen): # Clear the terminal and print the new board
+def PrintBoard(board, screen): # Clear the terminal and print the new board
     for i, content in enumerate(board):
         if content == "*":
             coords = IndexToCoordinates(i)
@@ -48,7 +49,6 @@ def PrintBoard(board, length, screen): # Clear the terminal and print the new bo
         else:
             coords = IndexToCoordinates(i)
             AddRectangle(coords[0], coords[1], 0, 0, 0, screen)
-    print(f"\nScore: {length-2}")
     pygame.display.update()
 
 def CheckDeath(headPos, snakePos): # Check if the snake is outside of the board or intersecting itself
@@ -57,42 +57,56 @@ def CheckDeath(headPos, snakePos): # Check if the snake is outside of the board 
     if headPos in bodyPos:
         return True
 
-    isOffScreen = not (0 < headPos[0] < 17) or not (0 < headPos[1] < 17)
-    if isOffScreen:
-        return True
-    return False
-
 def CheckPotentialDeath(newHeadPos, snakePos): # For a given input, check if the snake would die if it made that move
     if newHeadPos in snakePos:
         return True
 
-    isOffScreen = not (0 < newHeadPos[0] < 17) or not (0 < newHeadPos[1] < 17)
-    if isOffScreen:
-        return True
-    return False
-
 def ChooseInput(applePos, headPos, direction, snakePos): # Choose the input that would get the snake closest to the apple
     input = [0, 0]
     if applePos[0] < headPos[0]:
-        input[0] = -1
+        if headPos[0] - applePos[0] > 8:
+            input[0] = 1
+        else:
+            input[0] = -1
     elif applePos[0] > headPos[0]:
-        input[0] = 1
+        if applePos[0] - headPos[0] > 8:
+            input[0] = -1
+        else:
+            input[0] = 1
     else:
         if applePos[1] < headPos[1]:
-            input[1] = -1
+            if headPos[1] - applePos[1] > 8:
+                input[1] = 1
+            else:
+                input[1] = -1
         elif applePos[1] > headPos[1]:
-            input[1] = 1
+            if applePos[1] - headPos[1] > 8:
+                input[1] = -1
+            else:
+                input[1] = 1
     if not ValidateInput(input, direction, headPos, snakePos):
         input = [0, 0]
         if applePos[1] < headPos[1]:
-            input[1] = -1
+            if headPos[1] - applePos[1] > 8:
+                input[1] = 1
+            else:
+                input[1] = -1
         elif applePos[1] > headPos[1]:
-            input[1] = 1
+            if applePos[1] - headPos[1] > 8:
+                input[1] = -1
+            else:
+                input[1] = 1
         else:
             if applePos[0] < headPos[0]:
-                input[0] = -1
+                if headPos[0] - applePos[0] > 8:
+                    input[0] = 1
+                else:
+                    input[0] = -1
             elif applePos[0] > headPos[0]:
-                input[0] = 1
+                if applePos[0] - headPos[0] > 8:
+                    input[0] = -1
+                else:
+                    input[0] = 1
     return input
 
 def GenerateInput(direction, applePos, headPos, snakePos): # Choose an appropriate input if possible and if not, choose a random one
@@ -120,8 +134,8 @@ def Main():
     pygame.display.set_caption('Snake Game')
 
     length = 1
-    applePos = [10, 9]
-    headPos = [9, 9]
+    applePos = [9, 8]
+    headPos = [8, 8]
     snakePos = [headPos.copy()]
     direction = [1, 0]
 
@@ -130,17 +144,18 @@ def Main():
         # Update the position of the snake
         headPos[0] += direction[0]
         headPos[1] += direction[1]
+        headPos = [headPos[0] % 16, headPos[1] % 16]
         snakePos.append(headPos.copy())
         applePos, length = EatApple(headPos, snakePos, applePos, length) # Update length and apple position
 
         if CheckDeath(headPos, snakePos): # Check for death and end the game if neccessary
             break
         UpdateBoard(headPos, applePos, snakePos, board) # Update the board with all the fields
-        PrintBoard(board, length, screen) # Print the board to the terminal
+        PrintBoard(board, screen) # Print the board to the terminal
         direction = GenerateInput(direction, applePos, headPos, snakePos) # Update the direction with the generated one
         if direction == [2, 2]: # End the game if no more move is possible
             break
-        wait(0.2) # Wait 0.2 seconds for visibility
+        wait(0.1) # Wait 0.2 seconds for visibility
     print(f"You lost! Your score was {length-2}") # Print the score after the game is lost
 
 if __name__ == '__main__':

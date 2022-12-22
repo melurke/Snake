@@ -4,23 +4,24 @@ from time import sleep as wait
 import pygame
 
 def ChooseApplePosition(snakePos): # Choose a new position for the apple after it is eaten
-    pos = [random.randint(1, 16), random.randint(1, 16)]
+    pos = [random.randint(0, 15), random.randint(0, 15)]
     while pos in snakePos:
-        pos = [random.randint(1, 16), random.randint(1, 16)]
+        pos = [random.randint(0, 15), random.randint(0, 15)]
     return pos
 
 def EatApple(headPos, snakePos, applePos, length): # Lengthen the snake if the apple is eaten and choose a new position for it
     if headPos == applePos:
         length += 1
         applePos = ChooseApplePosition(snakePos)
+        print(f"Score: {length - 2}")
     else:
         snakePos.remove(snakePos[0])
     return applePos, length
 
 def ValidNeighbor(pos):
-    if not (0 < pos[0] < 17):
+    if not (-1 < pos[0] < 16):
         return False
-    if not (0 < pos[1] < 17):
+    if not (-1 < pos[1] < 16):
         return False
     return True
 
@@ -56,8 +57,8 @@ def GenerateDijkstraValues(applePos, snakePos):
 
 def UpdateBoard(headPos, applePos, snakePos, board): # Update all the fields on the board
     values = GenerateDijkstraValues(applePos, snakePos)
-    for y in range(1, 17):
-        for x in range(1, 17):
+    for y in range(0, 16):
+        for x in range(0, 16):
             pos = [x, y]
             if pos == applePos:   content = "*"
             elif pos == headPos:  content = "#"
@@ -80,7 +81,7 @@ def IndexToCoordinates(i):
     y *= 50
     return (x, y)
 
-def PrintBoard(board, length, screen): # Clear the terminal and print the new board
+def PrintBoard(board, screen): # Clear the terminal and print the new board
     for i, content in enumerate(board):
         if content == "*":
             coords = IndexToCoordinates(i)
@@ -93,8 +94,7 @@ def PrintBoard(board, length, screen): # Clear the terminal and print the new bo
             AddRectangle(coords[0], coords[1], 0, 155, 0, screen)
         else:
             coords = IndexToCoordinates(i)
-            AddRectangle(coords[0], coords[1], 200 - 0.5 * Clamp(0, 255 - 10 * int(content), 400), 100, Clamp(0, 255 - 10 * int(content), 255), screen)
-    print(f"\nScore: {length-2}")
+            AddRectangle(coords[0], coords[1], (255-(Clamp(0, 5 * int(content), 255))), 255-(Clamp(0, 10 * int(content), 255)), 255-(Clamp(0, 10 * int(content), 255)), screen)
     pygame.display.update()
 
 def CheckDeath(headPos, snakePos): # Check if the snake is outside of the board or intersecting itself
@@ -103,7 +103,7 @@ def CheckDeath(headPos, snakePos): # Check if the snake is outside of the board 
     if headPos in bodyPos:
         return True
 
-    isOffScreen = not (0 < headPos[0] < 17) or not (0 < headPos[1] < 17)
+    isOffScreen = not (-1 < headPos[0] < 16) or not (-1 < headPos[1] < 16)
     if isOffScreen:
         return True
     return False
@@ -112,7 +112,7 @@ def CheckPotentialDeath(newHeadPos, snakePos): # For a given input, check if the
     if newHeadPos in snakePos:
         return True
 
-    isOffScreen = not (0 < newHeadPos[0] < 17) or not (0 < newHeadPos[1] < 17)
+    isOffScreen = not (-1 < newHeadPos[0] < 16) or not (-1 < newHeadPos[1] < 16)
     if isOffScreen:
         return True
     return False
@@ -138,8 +138,8 @@ def Main():
     pygame.display.set_caption('Snake Game')
 
     length = 1
-    applePos = [10, 9]
-    headPos = [9, 9]
+    applePos = [9, 8]
+    headPos = [8, 8]
     snakePos = [headPos.copy()]
     direction = [1, 0]
 
@@ -154,7 +154,7 @@ def Main():
         if CheckDeath(headPos, snakePos): # Check for death and end the game if neccessary
             break
         values = UpdateBoard(headPos, applePos, snakePos, board) # Update the board with all the fields
-        PrintBoard(board, length, screen) # Print the board to the terminal
+        PrintBoard(board, screen) # Print the board to the terminal
         direction = GenerateInput(headPos, values) # Update the direction with the generated one
         if direction == [2, 2]: # End the game if no more move is possible
             break
