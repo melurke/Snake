@@ -17,7 +17,7 @@ The random bot is pretty simple: The snake does a random possible move every tur
 Average: 0.137394
 
 Histogram:
-<img src="data/random_bot/histogram.png">
+<img src="data/random_bot/square/histogram.png">
 
 One can see that the bot doesn't do that well, but it did score 5 once, so that's more than we expected.
 
@@ -31,7 +31,7 @@ The simple bot tries to get closer to the apple, firstly in the horizontal direc
 Average: 25.150566
 
 Histogram:
-<img src="data/simple_bot/histogram.png">
+<img src="data/simple_bot/square/histogram.png">
 
 The score is much more widely spread, with the record being a score of 75, scored twice.
 For some reason, the bot seems to score even numbers of scores much more that odd ones. We unfortunately don't know why that is, but it seems important to point it out.
