@@ -158,9 +158,12 @@ def AddRectangle(x, y, r, g, b, screen):
 
 def Main():
     numOfApples = 1
-    obstacles = [[2, 2], [4, 10]]
-    portals = [[3, 4], [12, 8]]
-    darkMode = 1
+    obstacles = []
+    for x in range(8, 16):
+        for y in range(0, 8):
+            obstacles.append([x, y])
+    portals = []
+    darkMode = False
 
     pygame.init()
     screen = pygame.display.set_mode((800, 800))

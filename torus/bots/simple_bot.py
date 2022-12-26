@@ -59,23 +59,19 @@ def IndexToCoordinates(i):
 
 def PrintBoard(board, screen, darkMode): # Clear the terminal and print the new board
     for i, content in enumerate(board):
+        coords = IndexToCoordinates(i)
         if content == "*":
-            coords = IndexToCoordinates(i)
             AddRectangle(coords[0], coords[1], 255, 0, 0, screen)
         elif content == "#":
-            coords = IndexToCoordinates(i)
             AddRectangle(coords[0], coords[1], 0, 255, 0, screen)
         elif content == "+":
-            coords = IndexToCoordinates(i)
             AddRectangle(coords[0], coords[1], 0, 155, 0, screen)
         elif content == "?":
-            coords = IndexToCoordinates(i)
             if darkMode:
                 AddRectangle(coords[0], coords[1], 255, 255, 255, screen)
             else:
                 AddRectangle(coords[0], coords[1], 0, 0, 0, screen)
         else:
-            coords = IndexToCoordinates(i)
             if darkMode:
                 AddRectangle(coords[0], coords[1], 0, 0, 0, screen)
             else:
