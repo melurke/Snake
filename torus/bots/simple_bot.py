@@ -3,26 +3,47 @@ import random
 from time import sleep as wait
 import pygame
 
-def ChooseApplePosition(snakePos): # Choose a new position for the apple after it is eaten
+def ChooseApplePosition(snakePos, applePos): # Choose a new position for the apple after it is eaten
     pos = [random.randint(0, 15), random.randint(0, 15)]
-    while pos in snakePos:
+    while pos in snakePos or pos in applePos:
         pos = [random.randint(0, 15), random.randint(0, 15)]
     return pos
 
-def EatApple(headPos, snakePos, applePos, length): # Lengthen the snake if the apple is eaten and choose a new position for it
-    if headPos == applePos:
+def EatApple(headPos, snakePos, applePos, length, i): # Lengthen the snake if the apple is eaten and choose a new position for it
+    newApple = i
+    if headPos in applePos:
         length += 1
-        applePos = ChooseApplePosition(snakePos)
+        i = applePos.index(headPos)
+        applePos[i] = ChooseApplePosition(snakePos, applePos)
+        newApple = GenerateClosestApple(applePos, headPos)
         print(f"Score: {length - 2}")
     else:
         snakePos.remove(snakePos[0])
-    return applePos, length
+    return applePos, length, newApple
+
+def AppleDistance(headPos, applePos):
+    if abs(headPos[0] - applePos[0]) < 8:
+        x = abs(headPos[0] - applePos[0])
+    else:
+        x = 8 - (abs(headPos[0] - applePos[0]) % 8)
+    if abs(headPos[1] - applePos[1]) < 8:
+        y = abs(headPos[1] - applePos[1])
+    else:
+        y = 8 - (abs(headPos[1] - applePos[1]) % 8)
+    return x + y
+
+def GenerateClosestApple(applePos, headPos):
+    dist = []
+    for pos in applePos:
+        dist.append(AppleDistance(headPos, pos))
+
+    return dist.index(min(dist))
 
 def UpdateBoard(headPos, applePos, snakePos, board): # Update all the fields on the board
     for y in range(0, 16):
         for x in range(0, 16):
             pos = [x, y]
-            if pos == applePos:   content = "*"
+            if pos in applePos:   content = "*"
             elif pos == headPos:  content = "#"
             elif pos in snakePos: content = "+"
             else:                 content = "O"
@@ -129,14 +150,19 @@ def AddRectangle(x, y, r, g, b, screen):
     pygame.draw.rect(screen, (r, g, b),(x+1, y+1, 48, 48))
 
 def Main():
+    numOfApples = 1
+
     pygame.init()
     screen = pygame.display.set_mode((800, 800))
     pygame.display.set_caption('Snake Game')
 
     length = 1
-    applePos = [9, 8]
     headPos = [8, 8]
     snakePos = [headPos.copy()]
+    applePos = [[9, 8]]
+    appleIndex = 0
+    for i in range(numOfApples-1):
+        applePos.append(ChooseApplePosition(snakePos, applePos))
     direction = [1, 0]
 
     while True:
@@ -146,13 +172,13 @@ def Main():
         headPos[1] += direction[1]
         headPos = [headPos[0] % 16, headPos[1] % 16]
         snakePos.append(headPos.copy())
-        applePos, length = EatApple(headPos, snakePos, applePos, length) # Update length and apple position
+        applePos, length, appleIndex = EatApple(headPos, snakePos, applePos, length, appleIndex) # Update length and apple position
 
         if CheckDeath(headPos, snakePos): # Check for death and end the game if neccessary
             break
         UpdateBoard(headPos, applePos, snakePos, board) # Update the board with all the fields
         PrintBoard(board, screen) # Print the board to the terminal
-        direction = GenerateInput(direction, applePos, headPos, snakePos) # Update the direction with the generated one
+        direction = GenerateInput(direction, applePos[appleIndex], headPos, snakePos) # Update the direction with the generated one
         if direction == [2, 2]: # End the game if no more move is possible
             break
         wait(0.1) # Wait 0.2 seconds for visibility

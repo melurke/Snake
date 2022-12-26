@@ -3,16 +3,17 @@ import random
 from time import sleep as wait
 import pygame
 
-def ChooseApplePosition(snakePos): # Choose a new position for the apple after it is eaten
+def ChooseApplePosition(snakePos, applePos): # Choose a new position for the apple after it is eaten
     pos = [random.randint(0, 15), random.randint(0, 15)]
-    while pos in snakePos:
+    while pos in snakePos or pos in applePos:
         pos = [random.randint(0, 15), random.randint(0, 15)]
     return pos
 
 def EatApple(headPos, snakePos, applePos, length): # Lengthen the snake if the apple is eaten and choose a new position for it
-    if headPos == applePos:
+    if headPos in applePos:
+        i = applePos.index(headPos)
         length += 1
-        applePos = ChooseApplePosition(snakePos)
+        applePos[i] = ChooseApplePosition(snakePos, applePos)
         print(f"Score: {length - 2}")
     else:
         snakePos.remove(snakePos[0])
@@ -22,7 +23,7 @@ def UpdateBoard(headPos, applePos, snakePos, board): # Update all the fields on 
     for y in range(0, 16):
         for x in range(0, 16):
             pos = [x, y]
-            if pos == applePos:   content = "*"
+            if pos in applePos:   content = "*"
             elif pos == headPos:  content = "#"
             elif pos in snakePos: content = "+"
             else:                 content = "O"
@@ -76,14 +77,18 @@ def AddRectangle(x, y, r, g, b, screen):
     pygame.draw.rect(screen, (r, g, b),(x+1, y+1, 48, 48))
 
 def Main():
+    numOfApples = 1
+
     pygame.init()
     screen = pygame.display.set_mode((800, 800))
     pygame.display.set_caption('Snake Game')
 
     length = 1
-    applePos = [9, 8]
     headPos = [8, 8]
     snakePos = [headPos.copy()]
+    applePos = [[9, 8]]
+    for i in range(numOfApples-1):
+        applePos.append(ChooseApplePosition(snakePos, applePos))
     direction = [1, 0]
 
     while True:

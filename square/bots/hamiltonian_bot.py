@@ -3,16 +3,17 @@ import random
 from time import sleep as wait
 import pygame
 
-def ChooseApplePosition(snakePos): # Choose a new position for the apple after it is eaten
+def ChooseApplePosition(snakePos, applePos): # Choose a new position for the apple after it is eaten
     pos = [random.randint(0, 15), random.randint(0, 15)]
-    while pos in snakePos:
+    while pos in snakePos or pos in applePos:
         pos = [random.randint(0, 15), random.randint(0, 15)]
     return pos
 
 def EatApple(headPos, snakePos, applePos, length): # Lengthen the snake if the apple is eaten and choose a new position for it
-    if headPos == applePos:
+    if headPos in applePos:
+        i = applePos.index(headPos)
         length += 1
-        applePos = ChooseApplePosition(snakePos)
+        applePos[i] = ChooseApplePosition(snakePos, applePos)
         print(f"Score: {length - 2}")
     else:
         snakePos.remove(snakePos[0])
@@ -22,7 +23,7 @@ def UpdateBoard(headPos, applePos, snakePos, board): # Update all the fields on 
     for y in range(0, 16):
         for x in range(0, 16):
             pos = [x, y]
-            if pos == applePos:   content = "*" # Apple
+            if pos in applePos:   content = "*" # Apple
             elif pos == headPos:  content = "#" # Head
             elif pos in snakePos: content = "+" # Body
             else:                 content = "O" # Empty field
@@ -35,7 +36,7 @@ def IndexToCoordinates(i):
     y *= 50
     return (x, y)
 
-def PrintBoard(board, length, screen): # Clear the terminal and print the new board
+def PrintBoard(board, screen): # Clear the terminal and print the new board
     for i, content in enumerate(board):
         if content == "*":
             coords = IndexToCoordinates(i)
@@ -63,7 +64,7 @@ def CheckDeath(headPos, snakePos): # Check if the snake is outside of the board 
     return False
 
 def GenerateInput(headPos, rightPos, downPos, upPos, leftPos, direction):
-    if headPos == [10, 9]:
+    if headPos == [9, 8]:
         return [0, -1]
     if headPos in rightPos:
         return [1, 0]
@@ -79,20 +80,24 @@ def AddRectangle(x, y, r, g, b, screen):
     pygame.draw.rect(screen, (r, g, b),(x+1, y+1, 48, 48))
 
 def Main():
+    numOfApples = 1
+
     pygame.init()
     screen = pygame.display.set_mode((800, 800))
     pygame.display.set_caption('Snake Game')
     
     length = 1
-    applePos = [9, 8]
     headPos = [8, 8]
     snakePos = [headPos.copy()]
+    applePos = [[9, 8]]
+    for i in range(numOfApples-1):
+        applePos.append(ChooseApplePosition(snakePos, applePos))
     direction = [1, 0]
 
-    rightPos = [[1, 16], [2, 2], [3, 16], [4, 2], [5, 16], [6, 2], [7, 16], [8, 2], [9, 16], [10, 2], [11, 16], [12, 2], [13, 16], [14, 2], [15, 16]]
-    upPos = [[2, 16], [4, 16], [6, 16], [8, 16], [10, 16], [12, 16], [14, 16], [16, 16]]
-    leftPos = [[16, 1]]
-    downPos = [[1, 1], [3, 2], [5, 2], [7, 2], [9, 2], [11, 2], [13, 2], [15, 2]]
+    rightPos = [[0, 15], [1, 1], [2, 15], [3, 1], [4, 15], [5, 1], [6, 15], [7, 1], [8, 15], [9, 1], [10, 15], [11, 1], [12, 15], [13, 1], [14, 15]]
+    upPos = [[1, 15], [3, 15], [5, 15], [7, 15], [9, 15], [11, 15], [13, 15], [15, 15]]
+    leftPos = [[15, 0]]
+    downPos = [[0, 0], [2, 1], [4, 1], [6, 1], [8, 1], [10, 1], [12, 1], [14, 1]]
 
     while True:
         board = []

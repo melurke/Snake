@@ -5,16 +5,17 @@ import matplotlib.pyplot as plt
 # Import generation functions from all the bots
 from torus.bots.dijkstra_bot import GenerateInput, GenerateDijkstraValues
 
-def ChooseApplePosition(snakePos): # Choose a new position for the apple after it is eaten
+def ChooseApplePosition(snakePos, applePos): # Choose a new position for the apple after it is eaten
     pos = [random.randint(0, 15), random.randint(0, 15)]
-    while pos in snakePos:
+    while pos in snakePos or pos in applePos:
         pos = [random.randint(0, 15), random.randint(0, 15)]
     return pos
 
 def EatApple(headPos, snakePos, applePos, length): # Lengthen the snake if the apple is eaten and choose a new position for it
-    if headPos == applePos:
+    if headPos in applePos:
+        i = applePos.index(headPos)
         length += 1
-        applePos = ChooseApplePosition(snakePos)
+        applePos[i] = ChooseApplePosition(snakePos, applePos)
     else:
         snakePos.remove(snakePos[0])
     return applePos, length
@@ -71,10 +72,14 @@ def WriteToFile(string, fileLocation):
         file.write(string)
 
 def Game(): # Play one game at a time
+    numOfApples = 2
+
     length = 1
-    applePos = [9, 8]
     headPos = [8, 8]
     snakePos = [headPos.copy()]
+    applePos = [[9, 8]]
+    for i in range(numOfApples-1):
+        applePos.append(ChooseApplePosition(snakePos, applePos))
     direction = [1, 0]
 
     while True:
@@ -94,10 +99,10 @@ def Game(): # Play one game at a time
     return length - 2
 
 def Main():
-    numOfGames = 100000
+    numOfGames = 100
     games = RunGames(numOfGames)
     average, distribution = ProcessGames(games)
-    SaveResults(numOfGames, average, distribution, "data/dijkstra_bot/torus/results.txt")
+    SaveResults(numOfGames, average, distribution, "data/dijkstra_bot/torus/results2.txt")
 
 if __name__ == '__main__':
     try:
