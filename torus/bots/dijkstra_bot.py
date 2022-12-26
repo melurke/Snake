@@ -3,17 +3,17 @@ import random
 from time import sleep as wait
 import pygame
 
-def ChooseApplePosition(snakePos, applePos): # Choose a new position for the apple after it is eaten
+def ChooseApplePosition(snakePos, applePos, obstacles): # Choose a new position for the apple after it is eaten
     pos = [random.randint(0, 15), random.randint(0, 15)]
-    while pos in snakePos or pos in applePos:
+    while pos in snakePos or pos in applePos or pos in obstacles:
         pos = [random.randint(0, 15), random.randint(0, 15)]
     return pos
 
-def EatApple(headPos, snakePos, applePos, length): # Lengthen the snake if the apple is eaten and choose a new position for it
+def EatApple(headPos, snakePos, applePos, length, obstacles): # Lengthen the snake if the apple is eaten and choose a new position for it
     if headPos in applePos:
         i = applePos.index(headPos)
         length += 1
-        applePos[i] = ChooseApplePosition(snakePos, applePos)
+        applePos[i] = ChooseApplePosition(snakePos, applePos, obstacles)
         print(f"Score: {length - 2}")
     else:
         snakePos.remove(snakePos[0])
@@ -26,7 +26,7 @@ def GenerateNeighbors(pos):
         neighborList.append(neighbor)
     return neighborList
 
-def GenerateDijkstraValues(applePos, snakePos):
+def GenerateDijkstraValues(applePos, snakePos, obstacles):
     values = [128] * 256
     for pos in snakePos:
         values[(pos[0] + 16 * (pos[1] - 1)) - 1] = 129
@@ -37,7 +37,9 @@ def GenerateDijkstraValues(applePos, snakePos):
         for pos in fields.copy():
             neighbors = GenerateNeighbors(pos)
             for neighbor in neighbors:
-                if values[neighbor[0] + 16 * (neighbor[1] - 1) - 1] == 128:
+                if neighbor in obstacles:
+                    values[neighbor[0] + 16 * (neighbor[1] - 1) - 1] = 200
+                elif values[neighbor[0] + 16 * (neighbor[1] - 1) - 1] == 128:
                     values[neighbor[0] + 16 * (neighbor[1] - 1) - 1] = values[pos[0] + 16 * (pos[1] - 1) - 1] + 1
                     fields.append(neighbor)
             fields.remove(pos)
@@ -50,8 +52,8 @@ def GenerateDijkstraValues(applePos, snakePos):
         values[pos[0] + 16 * (pos[1] - 1) - 1] = 0
     return values
 
-def UpdateBoard(headPos, applePos, snakePos, board): # Update all the fields on the board
-    values = GenerateDijkstraValues(applePos, snakePos)
+def UpdateBoard(headPos, applePos, snakePos, board, obstacles): # Update all the fields on the board
+    values = GenerateDijkstraValues(applePos, snakePos, obstacles)
     for y in range(0, 16):
         for x in range(0, 16):
             pos = [x, y]
@@ -76,7 +78,7 @@ def IndexToCoordinates(i):
     y *= 50
     return (x, y)
 
-def PrintBoard(board, screen): # Clear the terminal and print the new board
+def PrintBoard(board, screen, darkMode): # Clear the terminal and print the new board
     for i, content in enumerate(board):
         if content == "*":
             coords = IndexToCoordinates(i)
@@ -89,7 +91,11 @@ def PrintBoard(board, screen): # Clear the terminal and print the new board
             AddRectangle(coords[0], coords[1], 0, 155, 0, screen)
         else:
             coords = IndexToCoordinates(i)
-            AddRectangle(coords[0], coords[1], (255 - (Clamp(0, 5 * int(content), 255))), 255 - (Clamp(0, 10 * int(content), 255)), 255 - (Clamp(0, 10 * int(content), 255)), screen)
+            if darkMode:
+                AddRectangle(coords[0], coords[1], (Clamp(0, 5 * int(content), 255)), (Clamp(0, 10 * int(content), 255)), (Clamp(0, 10 * int(content), 255)), screen)
+            else:
+                AddRectangle(coords[0], coords[1], 255 - (Clamp(0, 5 * int(content), 255)), 255 - (Clamp(0, 10 * int(content), 255)), 255 - (Clamp(0, 10 * int(content), 255)), screen)
+
     pygame.display.update()
 
 def CheckDeath(headPos, snakePos): # Check if the snake is outside of the board or intersecting itself
@@ -124,6 +130,8 @@ def AddRectangle(x, y, r, g, b, screen):
 
 def Main():
     numOfApples = 1
+    obstacles = []
+    darkMode = False
 
     pygame.init()
     screen = pygame.display.set_mode((800, 800))
@@ -134,7 +142,7 @@ def Main():
     snakePos = [headPos.copy()]
     applePos = [[9, 8]]
     for i in range(numOfApples-1):
-        applePos.append(ChooseApplePosition(snakePos, applePos))
+        applePos.append(ChooseApplePosition(snakePos, applePos, obstacles))
     direction = [1, 0]
 
     while True:
@@ -144,12 +152,12 @@ def Main():
         headPos[1] += direction[1]
         headPos = [headPos[0] % 16, headPos[1] % 16]
         snakePos.append(headPos.copy())
-        applePos, length = EatApple(headPos, snakePos, applePos, length) # Update length and apple position
+        applePos, length = EatApple(headPos, snakePos, applePos, length, obstacles) # Update length and apple position
 
         if CheckDeath(headPos, snakePos): # Check for death and end the game if neccessary
             break
-        values = UpdateBoard(headPos, applePos, snakePos, board) # Update the board with all the fields
-        PrintBoard(board, screen) # Print the board to the terminal
+        values = UpdateBoard(headPos, applePos, snakePos, board, obstacles) # Update the board with all the fields
+        PrintBoard(board, screen, darkMode) # Print the board to the terminal
         direction = GenerateInput(headPos, values) # Update the direction with the generated one
         if direction == [2, 2]: # End the game if no more move is possible
             break

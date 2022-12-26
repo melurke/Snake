@@ -36,7 +36,7 @@ def IndexToCoordinates(i):
     y *= 50
     return (x, y)
 
-def PrintBoard(board, screen): # Clear the terminal and print the new board
+def PrintBoard(board, screen, darkMode): # Clear the terminal and print the new board
     for i, content in enumerate(board):
         if content == "*":
             coords = IndexToCoordinates(i)
@@ -49,7 +49,10 @@ def PrintBoard(board, screen): # Clear the terminal and print the new board
             AddRectangle(coords[0], coords[1], 0, 155, 0, screen)
         else:
             coords = IndexToCoordinates(i)
-            AddRectangle(coords[0], coords[1], 0, 0, 0, screen)
+            if darkMode:
+                AddRectangle(coords[0], coords[1], 0, 0, 0, screen)
+            else:
+                AddRectangle(coords[0], coords[1], 255, 255, 255, screen)
     pygame.display.update()
 
 def CheckDeath(headPos, snakePos): # Check if the snake is outside of the board or intersecting itself
@@ -81,10 +84,13 @@ def AddRectangle(x, y, r, g, b, screen):
 
 def Main():
     numOfApples = 1
+    darkMode = False
 
     pygame.init()
     screen = pygame.display.set_mode((800, 800))
     pygame.display.set_caption('Snake Game')
+    if darkMode:
+        screen.fill((200, 200, 200))
     
     length = 1
     headPos = [8, 8]
@@ -110,7 +116,7 @@ def Main():
         if CheckDeath(headPos, snakePos): # Check for death and end the game if neccessary
             break
         UpdateBoard(headPos, applePos, snakePos, board) # Update the board with all the new fields
-        PrintBoard(board, screen) # Print the board to the terminal
+        PrintBoard(board, screen, darkMode) # Print the board to the terminal
         direction = GenerateInput(headPos, rightPos, downPos, upPos, leftPos, direction) # Generate a new direction randomly
         wait(0.005) # Wait a short amount of time for visibility
     print(f"\nYou lost! Your score was {length-2}") # Print the score after the game is lost
