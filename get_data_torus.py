@@ -5,25 +5,27 @@ import matplotlib.pyplot as plt
 # Import generation functions from all the bots
 from torus.bots.dijkstra_bot import GenerateInput, GenerateDijkstraValues
 
-def ChooseApplePosition(snakePos, applePos): # Choose a new position for the apple after it is eaten
+def ChooseApplePosition(snakePos, applePos, obstacles, portals): # Choose a new position for the apple after it is eaten
     pos = [random.randint(0, 15), random.randint(0, 15)]
-    while pos in snakePos or pos in applePos:
+    while pos in snakePos or pos in applePos or pos in obstacles or pos in portals:
         pos = [random.randint(0, 15), random.randint(0, 15)]
     return pos
 
-def EatApple(headPos, snakePos, applePos, length): # Lengthen the snake if the apple is eaten and choose a new position for it
+def EatApple(headPos, snakePos, applePos, length, obstacles, portals): # Lengthen the snake if the apple is eaten and choose a new position for it
     if headPos in applePos:
         i = applePos.index(headPos)
         length += 1
-        applePos[i] = ChooseApplePosition(snakePos, applePos)
+        applePos[i] = ChooseApplePosition(snakePos, applePos, obstacles, portals)
     else:
         snakePos.remove(snakePos[0])
     return applePos, length
 
-def CheckDeath(headPos, snakePos): # Check if the snake is outside of the board or intersecting itself
+def CheckDeath(headPos, snakePos, obstacles): # Check if the snake is outside of the board or intersecting itself
     bodyPos = snakePos.copy()
     bodyPos.remove(headPos)
     if headPos in bodyPos:
+        return True
+    if headPos in obstacles:
         return True
 
 def RunGames(numOfGames):
@@ -72,14 +74,16 @@ def WriteToFile(string, fileLocation):
         file.write(string)
 
 def Game(): # Play one game at a time
-    numOfApples = 2
+    numOfApples = 1
+    obstacles = []
+    portals = []
 
     length = 1
     headPos = [8, 8]
     snakePos = [headPos.copy()]
     applePos = [[9, 8]]
     for i in range(numOfApples-1):
-        applePos.append(ChooseApplePosition(snakePos, applePos))
+        applePos.append(ChooseApplePosition(snakePos, applePos, obstacles, portals))
     direction = [1, 0]
 
     while True:
@@ -87,12 +91,21 @@ def Game(): # Play one game at a time
         headPos[0] += direction[0]
         headPos[1] += direction[1]
         headPos = [headPos[0] % 16, headPos[1] % 16]
+        try:
+            teleported = False
+            if headPos == portals[0]:
+                headPos = portals[1].copy()
+                teleported = True
+            if headPos == portals[1] and not teleported:
+                headPos = portals[0].copy()
+        except IndexError:
+            pass
         snakePos.append(headPos.copy())
-        applePos, length = EatApple(headPos, snakePos, applePos, length) # Update length and apple position
+        applePos, length = EatApple(headPos, snakePos, applePos, length, obstacles, portals) # Update length and apple position
 
-        if CheckDeath(headPos, snakePos): # Check for death and end the game if neccessary
+        if CheckDeath(headPos, snakePos, obstacles): # Check for death and end the game if neccessary
             break
-        values = GenerateDijkstraValues(applePos, snakePos)
+        values = GenerateDijkstraValues(applePos, snakePos, obstacles, portals)
         direction = GenerateInput(headPos, values) # Update the direction with the generated one
         if direction == [2, 2]: # End the game if no more move is possible
             break
