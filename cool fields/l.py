@@ -50,7 +50,7 @@ def GenerateDijkstraValues(applePos, snakePos, obstacles, portals):
             neighbors = GenerateNeighbors(pos)
             for neighbor in neighbors:
                 if neighbor in obstacles:
-                    values[neighbor[0] + 16 * (neighbor[1] - 1) - 1] = 129
+                    values[neighbor[0] + 16 * (neighbor[1] - 1) - 1] = 200
                 elif values[neighbor[0] + 16 * (neighbor[1] - 1) - 1] == 128:
                     if neighbor in portals:
                         values[neighbor[0] + 16 * (neighbor[1] - 1) - 1] = values[pos[0] + 16 * (pos[1] - 1) - 1] + 1
