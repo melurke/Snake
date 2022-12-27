@@ -3,7 +3,7 @@ import random
 import matplotlib.pyplot as plt
 
 # Import generation functions from all the bots
-from square.bots.dijkstra_bot import GenerateInput, GenerateDijkstraValues
+from bots.dijkstra_bot import GenerateInput, GenerateDijkstraValues
 
 def ChooseApplePosition(snakePos, applePos, obstacles, portals): # Choose a new position for the apple after it is eaten
     pos = [random.randint(0, 15), random.randint(0, 15)]
@@ -27,11 +27,6 @@ def CheckDeath(headPos, snakePos, obstacles): # Check if the snake is outside of
         return True
     if headPos in obstacles:
         return True
-
-    isOffScreen = not (-1 < headPos[0] < 16) or not (-1 < headPos[1] < 16)
-    if isOffScreen:
-        return True
-    return False
 
 def RunGames(numOfGames):
     games = []
@@ -82,7 +77,7 @@ def Game(): # Play one game at a time
     numOfApples = 1
     obstacles = []
     portals = []
-    
+
     length = 1
     headPos = [8, 8]
     snakePos = [headPos.copy()]
@@ -95,6 +90,7 @@ def Game(): # Play one game at a time
         # Update the position of the snake
         headPos[0] += direction[0]
         headPos[1] += direction[1]
+        headPos = [headPos[0] % 16, headPos[1] % 16]
         try:
             teleported = False
             if headPos == portals[0]:
@@ -116,10 +112,10 @@ def Game(): # Play one game at a time
     return length - 2
 
 def Main():
-    numOfGames = 100000
+    numOfGames = 100
     games = RunGames(numOfGames)
     average, distribution = ProcessGames(games)
-    SaveResults(numOfGames, average, distribution, "data/dijkstra_bot/square/results.txt")
+    SaveResults(numOfGames, average, distribution, "../data/dijkstra_bot/torus/results2.txt")
 
 if __name__ == '__main__':
     try:
