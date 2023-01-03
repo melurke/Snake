@@ -26,7 +26,7 @@ One can see that the bot doesn't do that well, but it did score 5 once, so that'
 Average: 7.584119
 
 Histogram:
-<img src="data/random_bot/square/histogram.png">
+<img src="data/random_bot/torus/histogram.png">
 
 Now that the bot can't die by running into a wall, the minimum score is 6. With that length it is possible for the snake to surround itself and die. After that, the score drops pretty fast though. Still, the average is pretty high for a bot that only performs random moves.
 
