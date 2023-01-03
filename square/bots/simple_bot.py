@@ -3,17 +3,17 @@ import random
 from time import sleep as wait
 import pygame
 
-def ChooseApplePosition(snakePos, applePos, obstacles): # Choose a new position for the apple after it is eaten
+def ChooseApplePosition(snakePos, applePos, obstacles, portals): # Choose a new position for the apple after it is eaten
     pos = [random.randint(0, 15), random.randint(0, 15)]
-    while pos in snakePos or pos in applePos or pos in obstacles:
+    while pos in snakePos or pos in applePos or pos in obstacles or pos in portals:
         pos = [random.randint(0, 15), random.randint(0, 15)]
     return pos
 
-def EatApple(headPos, snakePos, applePos, length, obstacles): # Lengthen the snake if the apple is eaten and choose a new position for it
+def EatApple(headPos, snakePos, applePos, length, obstacles, portals): # Lengthen the snake if the apple is eaten and choose a new position for it
     if headPos in applePos:
         i = applePos.index(headPos)
         length += 1
-        applePos[i] = ChooseApplePosition(snakePos, applePos, obstacles)
+        applePos[i] = ChooseApplePosition(snakePos, applePos, obstacles, portals)
         print(f"Score: {length - 2}")
     else:
         snakePos.remove(snakePos[0])
@@ -29,11 +29,12 @@ def GenerateClosestApple(applePos, headPos):
     
     return dist.index(min(dist))
 
-def UpdateBoard(headPos, applePos, snakePos, board, obstacles): # Update all the fields on the board
+def UpdateBoard(headPos, applePos, snakePos, board, obstacles, portals): # Update all the fields on the board
     for y in range(0, 16):
         for x in range(0, 16):
             pos = [x, y]
             if pos in applePos:    content = "*"
+            elif pos in portals:   content = "%"
             elif pos == headPos:   content = "#"
             elif pos in snakePos:  content = "+"
             elif pos in obstacles: content = "?"
@@ -47,11 +48,16 @@ def IndexToCoordinates(i):
     y *= 50
     return (x, y)
 
-def PrintBoard(board, screen, darkMode): # Clear the terminal and print the new board
+def PrintBoard(board, screen, darkMode, portalUsed): # Clear the terminal and print the new board
     for i, content in enumerate(board):
         coords = IndexToCoordinates(i)
         if content == "*":
             AddRectangle(coords[0], coords[1], 255, 0, 0, screen)
+        elif content == "%":
+            if portalUsed:
+                AddRectangle(coords[0], coords[1], 100, 155, 200, screen)
+            else:
+                AddRectangle(coords[0], coords[1], 100, 0, 200, screen)
         elif content == "#":
             AddRectangle(coords[0], coords[1], 0, 255, 0, screen)
         elif content == "+":
@@ -134,6 +140,7 @@ def AddRectangle(x, y, r, g, b, screen):
 def Main():
     numOfApples = 1
     obstacles = []
+    portals = []
     darkMode = False
 
     pygame.init()
@@ -147,7 +154,7 @@ def Main():
     snakePos = [headPos.copy()]
     applePos = [[9, 8]]
     for i in range(numOfApples-1):
-        applePos.append(ChooseApplePosition(snakePos, applePos, obstacles))
+        applePos.append(ChooseApplePosition(snakePos, applePos, obstacles, portals))
     direction = [1, 0]
 
     while True:
@@ -155,18 +162,31 @@ def Main():
         # Update the position of the snake
         headPos[0] += direction[0]
         headPos[1] += direction[1]
+        try:
+            teleported = False
+            if headPos == portals[0]:
+                headPos = portals[1].copy()
+                teleported = True
+            if headPos == portals[1] and not teleported:
+                headPos = portals[0].copy()
+        except IndexError:
+            pass
         snakePos.append(headPos.copy())
-        applePos, length = EatApple(headPos, snakePos, applePos, length, obstacles) # Update length and apple position
+        portalUsed = False
+        for pos in snakePos:
+            if pos in portals:
+                portalUsed = True
+        applePos, length = EatApple(headPos, snakePos, applePos, length, obstacles, portals) # Update length and apple position
 
         if CheckDeath(headPos, snakePos): # Check for death and end the game if neccessary
             break
-        UpdateBoard(headPos, applePos, snakePos, board, obstacles) # Update the board with all the fields
-        PrintBoard(board, screen, darkMode) # Print the board to the terminal
+        UpdateBoard(headPos, applePos, snakePos, board, obstacles, portals) # Update the board with all the fields
+        PrintBoard(board, screen, darkMode, portalUsed) # Print the board to the terminal
         i = GenerateClosestApple(applePos, headPos)
         direction = GenerateInput(direction, applePos[i], headPos, snakePos, obstacles) # Update the direction with the generated one
         if direction == [2, 2]: # End the game if no more move is possible
             break
-        wait(0.2) # Wait 0.2 seconds for visibility
+        wait(0.1) # Wait 0.2 seconds for visibility
     print(f"You lost! Your score was {length-2}") # Print the score after the game is lost
 
 if __name__ == '__main__':
