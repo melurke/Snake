@@ -2,6 +2,39 @@
 
 In this repository, we created the game Snake to play in the terminal and some different bots that play the game automatically.
 
+## The game
+
+There are two different versions of the game. One is played on a square and the other one is played on a torus. This means that in the square version the player dies when running into a wall and in the torus version the player comes out on the other side of the field.
+
+The game is visualized using the pygame library. There is a light mode and a dark mode that can be turned of directly in the code using the darkMode variable.
+
+#### Apples
+
+The user can choose the number of apples that appear simultaneously in the game. This works for the game itself and for all of the bots.
+This can be done directly in the code using the `numOfApples` variable.
+
+#### Obstacles
+
+The user can also choose if they want any obstacles in the game and where they should be. This can be done by adding a list with the two coordinates to the `obstacles` list directly in the code. The coordinates start at [0, 0] in the top left corner and go to [15, 15] in the bottom right corner. The top right corner is [15, 0] and the bottom left corner is [0, 15].
+
+Example: `obstacles = [[3, 4], [6, 1], [10, 8]]`
+
+#### Portals
+
+The user can add a pair of portals to the field if they want. To do this, they need to specify the coordinates of the two portals in the `portals` list. To see how the coordinates are generated, see above. When the snake goes into one portal, it is instantly teleported to the other one. When going out of the second portal, the snake can also change directions.
+
+Example: `portals = [[4, 6], [13, 5]]`
+
+### Cool fields
+
+We've added two game configurations showing the possibilities of the different fields shown above. These can be found in the `cool fields` folder.
+
+The first game called `l.py` shows a very simple use of the obstacles. In this game, the top right quarter of the field is full of obstacles, meaning the field takes up an L-shape.
+
+The second game called `two_parts.py` is a bit more complicated. There is a diagonal line of obstacles connecting the bottom left and top right corner of the field. This divides the field into two parts that are only connected by a pair of portals.
+
+Both of these work with the dijkstra bot on a square field. Maybe we will add more of these examples in the future, but the user is invited to experiment with the different variables to create their own versions of the game.
+
 ## Bots
 
 To get the data for the bots, we used get_data.py. The program runs a certain amount of games (mostly 1 million) and stores the results in a text file.
