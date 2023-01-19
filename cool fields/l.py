@@ -85,7 +85,6 @@ def UpdateBoard(headPos, applePos, snakePos, board, obstacles, portals): # Updat
             elif pos in snakePos:  content = "+"
             else:                  content = str(values[x + 16 * (y - 1) - 1])
             board.append(content)
-    return values
 
 def Clamp(min, value, max):
     if value < min:
@@ -97,13 +96,12 @@ def Clamp(min, value, max):
 def IndexToCoordinates(i):
     x = i % 16
     y = (i - i % 16) / 16
-    x *= 50
-    y *= 50
-    return (x, y)
+    return [int(x), int(y)]
 
 def PrintBoard(board, screen, darkMode, portalUsed): # Clear the terminal and print the new board
     for i, content in enumerate(board):
         coords = IndexToCoordinates(i)
+        coords = [coords[0] * 50, coords[1] * 50]
         if content == "*":
             AddRectangle(coords[0], coords[1], 255, 0, 0, screen)
         elif content == "?":
@@ -141,7 +139,27 @@ def CheckDeath(headPos, snakePos, obstacles): # Check if the snake is outside of
         return True
     return False
 
-def GenerateInput(headPos, values): # Choose an appropriate input if possible and if not, choose a random one
+def GenerateInput(board, direction): # Choose an appropriate input if possible and if not, choose a random one
+    obstacles = []
+    portals = []
+    snakePos = []
+    applePos = []
+    headPos = []
+
+    for i, content in enumerate(board):
+        if content == "#":
+            headPos = IndexToCoordinates(i)
+            snakePos.append(IndexToCoordinates(i))
+        elif content == "*":
+            applePos.append(IndexToCoordinates(i))
+        elif content == "?":
+            obstacles.append(IndexToCoordinates(i))
+        elif content == "%":
+            portals.append(IndexToCoordinates(i))
+        elif content == "+":
+            snakePos.append(IndexToCoordinates(i))
+
+    values = GenerateDijkstraValues(applePos, snakePos, obstacles, portals)
     headNeighbors = GenerateNeighbors(headPos)
     inputValue = values[headNeighbors[0][0] + 16 * (headNeighbors[0][1] - 1) - 1]
     inputNeighbor = headNeighbors[0]
@@ -200,9 +218,9 @@ def Main():
 
         if CheckDeath(headPos, snakePos, obstacles): # Check for death and end the game if neccessary
             break
-        values = UpdateBoard(headPos, applePos, snakePos, board, obstacles, portals) # Update the board with all the fields
+        UpdateBoard(headPos, applePos, snakePos, board, obstacles, portals) # Update the board with all the fields
         PrintBoard(board, screen, darkMode, portalUsed) # Print the board to the terminal
-        direction = GenerateInput(headPos, values) # Update the direction with the generated one
+        direction = GenerateInput(board, direction) # Update the direction with the generated one
         if direction == [2, 2]: # End the game if no more move is possible
             break
         wait(0.1) # Wait 0.2 seconds for visibility

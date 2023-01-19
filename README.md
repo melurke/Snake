@@ -6,6 +6,8 @@ In this repository, we created the game Snake to play in the terminal and some d
 
 There are two different versions of the game. One is played on a square and the other one is played on a torus. This means that in the square version the player dies when running into a wall and in the torus version the player comes out on the other side of the field.
 
+In the two files, the user can change all of the variables, including the type of bot they want to use and all of the following variables, simply by changing them as at the very end of the code (to change the bot, type in the name of the class defined at the top of the file; to change other variables, see description below).
+
 The game is visualized using the pygame library. There is a light mode and a dark mode that can be turned of directly in the code using the darkMode variable.
 
 #### Apples
