@@ -217,7 +217,7 @@ class Player:
         return direction
 
     def GenerateInput(self, board, direction):
-        return self.heckInput(direction)
+        return self.CheckInput(direction)
 
 def ChooseApplePosition(snakePos, applePos, obstacles, portals): # Choose a new position for the apple after it is eaten
     pos = [random.randint(0, 15), random.randint(0, 15)]
