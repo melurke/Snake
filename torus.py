@@ -81,7 +81,7 @@ class Dijkstra:
                 inputValue = neighborValue
                 inputNeighbor = neighborPos
         input = [inputNeighbor[0] - headPos[0], inputNeighbor[1] - headPos[1]]
-        return input
+        return input, values
 
 class Random:
     def GenerateInput(self, board, direction):
@@ -96,7 +96,7 @@ class Random:
             if not board[newHeadPos[0] + 16 * newHeadPos[1]] in ["+", "#"]:
                 return input
             inputs.remove(input)
-        return random.choice([[1, 0], [-1, 0], [0, 1], [0, -1]])
+        return random.choice([[1, 0], [-1, 0], [0, 1], [0, -1]]), []
 
 class Simple:
     def AppleDistance(headPos, applePos):
@@ -195,7 +195,7 @@ class Simple:
                 choices.remove(input)
             else:
                 return [2, 2]
-        return input
+        return input, []
 
     def ValidateInput(self, input, direction, headPos, snakePos, obstacles): # Make shure the snake doesn't do a 180 turn or would die for a given input
         if input == [-1 * direction[0], -1 * direction[1]] or self.CheckPotentialDeath([headPos[0] + input[0], headPos[1] + input[1]], snakePos, obstacles):
@@ -217,7 +217,7 @@ class Player:
         return direction
 
     def GenerateInput(self, board, direction):
-        return self.CheckInput(direction)
+        return self.CheckInput(direction), []
 
 def ChooseApplePosition(snakePos, applePos, obstacles, portals): # Choose a new position for the apple after it is eaten
     pos = [random.randint(0, 15), random.randint(0, 15)]
@@ -252,33 +252,45 @@ def IndexToCoordinates(i):
     y = (i - i % 16) / 16
     return [int(x), int(y)]
 
-def PrintBoard(board, screen, darkMode, portalUsed): # Clear the terminal and print the new board
+def PrintBoard(board, screen, darkMode, portalUsed, dijkstraValues): # Clear the terminal and print the new board
     for i, content in enumerate(board):
+        col = []
         coords = IndexToCoordinates(i)
         coords = [coords[0] * 50, coords[1] * 50]
         if content == "*":
-            AddRectangle(coords[0], coords[1], 255, 0, 0, screen)
+            col = [255, 0, 0]
         elif content == "?":
-            AddRectangle(coords[0], coords[1], 50, 50, 50, screen)
+            col = [50, 50, 50]
         elif content == "#":
-            AddRectangle(coords[0], coords[1], 0, 255, 0, screen)
+            col = [0, 255, 0]
         elif content == "+":
-            AddRectangle(coords[0], coords[1], 0, 155, 0, screen)
+            col = [0, 155, 0]
         elif content == "%":
             if portalUsed:
                 if darkMode:
-                    AddRectangle(coords[0], coords[1], 155, 155, 55, screen)
+                    col = [155, 155, 55]
                 else:
-                    AddRectangle(coords[0], coords[1], 100, 155, 200, screen)
+                    col = [100, 155, 200]
             else:
-                AddRectangle(coords[0], coords[1], 100, 0, 200, screen)
+                col = [100, 0, 200]
         else:
-            if darkMode:
-                AddRectangle(coords[0], coords[1], 0, 0, 0, screen)
+            if dijkstraValues == []:
+                if darkMode:
+                    col = [0, 0, 0]
+                else:
+                    col = [255, 255, 255]
             else:
-                AddRectangle(coords[0], coords[1], 255, 255, 255, screen)
+                col = [Clamp(0, 10 * dijkstraValues[i], 255), Clamp(0, 10 * dijkstraValues[i], 255), 255]
+        AddRectangle(coords[0], coords[1], col[0], col[1], col[2], screen)
 
     pygame.display.update()
+
+def Clamp(min, desired, max):
+    if desired < min:
+        return min
+    if desired > max:
+        return max
+    return desired
 
 def CheckDeath(headPos, snakePos, obstacles): # Check if the snake is outside of the board or intersecting itself
     bodyPos = snakePos.copy()
@@ -329,15 +341,16 @@ def Main(bot, numOfApples, obstacles, portals, darkMode):
         if CheckDeath(headPos, snakePos, obstacles): # Check for death and end the game if neccessary
             break
         UpdateBoard(headPos, applePos, snakePos, board, obstacles, portals) # Update the board with all the fields
-        PrintBoard(board, screen, darkMode, portalUsed) # Print the board to the terminal
-        direction = bot.GenerateInput(bot, board, direction)
+        direction, dijkstraValues = bot.GenerateInput(bot, board, direction)
+        print(max(dijkstraValues))
+        PrintBoard(board, screen, darkMode, portalUsed, dijkstraValues) # Print the board to the terminal
         if direction == [2, 2]: # End the game if no more move is possible
             break
         wait(0.1) # Wait 0.2 seconds for visibility
     print(f"You lost! Your score was {length-2}") # Print the score after the game is lost
 
 if __name__ == '__main__':
-    bot = Random
+    bot = Dijkstra
     numOfApples = 1
     obstacles = []
     portals = []
