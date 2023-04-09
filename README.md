@@ -37,6 +37,10 @@ The second game called `two_parts.py` is a bit more complicated. There is a diag
 
 Both of these work with the dijkstra bot on a square field. Maybe we will add more of these examples in the future, but the user is invited to experiment with the different variables to create their own versions of the game.
 
+## NEAT
+
+We are currently in the process of adding an AI to our collection of bots. Unfortunately, there have been some problems regarding that. To train the AI we are using the `neat-python` module, but that hasn't quite worked out how we planned. As soon as we fix our issues, the files in the NEAT folder will be much more organized, so we recommend not looking into that folder as to not get confused.
+
 ## Bots
 
 To get the data for the bots, we used get_data.py. The program runs a certain amount of games (mostly 1 million) and stores the results in a text file.
